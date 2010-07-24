@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>XSL Tracer</title>
+		<link rel="stylesheet" href="./css/xsldbg.css" />
+		<script type="text/javascript" src="./src/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="./src/json2.js"></script>
+		<script type="text/javascript" src="./src/EventDispatcher.js"></script>
+		<script type="text/javascript" src="./src/htmlparser.js"></script>
+		<script type="text/javascript" src="./src/event-names.js"></script>
+		<script type="text/javascript" src="./src/xsl_tracer.js"></script>
+		<script type="text/javascript" src="./src/xsl_tracer.utils.js"></script>
+		<script type="text/javascript" src="./src/xsl_tracer.ui.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+		 	xsl_tracer.init({
+		 		source_url: './test/xml/simple.xml',
+		 		template_path: './test/xsl/',
+		 		template_file: 'simple.xsl',
+		 		trace_url: './test/out/simple.xhtml.json', 
+		 		result_url: './test/out/simple.xhtml'
+		 	});
+		</script>
+	</body>
+</html>

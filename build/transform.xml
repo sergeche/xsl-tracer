@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="XSL Tracer" default="transform" basedir="../">
+	<description>Some tracing transforms for testing purposes</description>
+	<property name="resources" value="${basedir}/test" />
+	
+	<taskdef name="saxon-xsl" classname="net.sf.saxon.ant.AntTransform">
+		<classpath>
+			<fileset dir="./bin/">
+				<include name="saxon9he.jar" />
+				<include name="tracer.jar" />
+				<include name="saxon-ant.jar" />
+			</fileset>
+		</classpath>
+	</taskdef>
+	
+	
+	<target name="transform">
+		<saxon-xsl 
+			style="${resources}/xsl/simple.xsl" 
+			in="${resources}/xml/simple.xml" 
+			out="${resources}/out/simple.xhtml" 
+			force="yes" 
+			tracing="yes" />
+	</target>
+</project>
