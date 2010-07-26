@@ -177,23 +177,6 @@ var xsl_tracer = function() {
 		var entities = {};
 		var cont = fileContainer();
 		
-		function getIncludes(doc){
-			var result = [];
-			$.each(['import', 'include'], function(i, name){
-				result = result.concat($.makeArray(doc.documentElement.getElementsByTagNameNS(ns_map.xsl, name)));
-			});
-			return result;
-		};
-		
-		function loadIncludes(doc){
-			$.each(getIncludes(doc), function(i, /* Element */tag){
-				var href = tag.getAttribute('href');
-				if (href)
-					loadFile(template_path + href, 'templates');
-			});
-		}
-			
-		
 		var uber_add = cont.add;
 		cont.add = function(/* String */name, /* String */content){
 			/*
@@ -211,7 +194,7 @@ var xsl_tracer = function() {
 			var text_data = escapeEntity(content, function(str, p1){
 				// грузим файл с энтити
 				entity_file = p1;
-				loadFile(template_path + entity_file, 'entities');
+				loadFile(resolvePath(entity_file, 'dtd'), 'entities');
 				return '';
 			});
 			
@@ -222,7 +205,6 @@ var xsl_tracer = function() {
 			if (!doc)
 				console.log(name, real_name);
 				
-			loadIncludes(doc);
 			indexTree(doc);
 			
 			uber_add(name, doc);
@@ -349,6 +331,18 @@ var xsl_tracer = function() {
 		// эскейпим энтити, чтоб не мешали в преобразовании в xml
 		return text.replace(/&(?!#|x\d)/gi, '&amp;');
 	}
+	
+	/**
+	 * Resolves path to file name, making it usable for downloading
+	 * (i.e. make absolute path for document)
+	 * @param {String} filename File name
+	 * @param {String} type Document type (xsl, dtd, xml) to resolve path for
+	 * @return {String}
+	 */
+	var resolvePath = function(filename, type) {
+		return template_path + filename;
+	}
+	
 	
 	/**
 	 * Индексирует дерево элементов. Индексация представляет 
@@ -703,15 +697,12 @@ var xsl_tracer = function() {
 		
 		loadFile(params.trace_url, 'trace', 'json', function(doc) {
 			$.each(findModules(doc), function(i, n) {
-				loadFile(template_path + n, 'templates');
+				loadFile(resolvePath(n, 'xsl'), 'templates');
 			});
 		});
 		loadFile(params.source_url, 'source', 'xml');
 		loadFile(params.result_url, 'result', 'xml');
 		
-//		loadFile(template_path + params.template_file, 'templates');
-
-
 		// ожидаем завершения загрузки всех файлов
 		var wait_timer = setInterval(function() {
 			if (!loadFile.num_loading) {
@@ -729,7 +720,6 @@ var xsl_tracer = function() {
 		 * @param {Object} params Хэш параметров дебаггера
 		 */
 		init : function(params) {
-			
 			this.addEventListener(EVENT.LOAD_COMPLETE, function(){
 				if (!loadFile.num_error) {
 					// нету ошибок, можем инициализироваться
@@ -806,6 +796,16 @@ var xsl_tracer = function() {
 		getElementById: function(id){
 			id = parseInt(id.substr(1));
 			return indexTree.cache[id];
+		},
+		
+		/**
+		 * Setup function that is used for path resolving. This function should
+		 * accept two arguments: <code>filename</code> (file's name) and 
+		 * <code>type</code> (document type: xsl, dtd, xml)
+		 * @param {Function} fn
+		 */
+		setPathResolver: function(fn) {
+			resolvePath = fn;
 		}
 	}
 }();
