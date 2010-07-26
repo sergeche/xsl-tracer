@@ -134,11 +134,12 @@ var xsl_tracer = function() {
 	};
 	
 	/**
-	 * Проходимся по трассировочному документу и выполняем функцию <code>callback</code> на каждом элементею
+	 * Проходимся по трассировочному документу и выполняем функцию <code>callback</code> на каждом элементе.
 	 * @param {Function} callback
+	 * @param {Object} [doc]  
 	 */
-	function walkTraceDoc(callback) {
-		var doc = docs.trace;
+	function walkTraceDoc(callback, doc) {
+		doc =  doc || docs.trace;
 		try {
 			function walk(elem) {
 				for (var i = 0, il = elem.children.length; i < il; i++) {
@@ -392,181 +393,6 @@ var xsl_tracer = function() {
 	 * 
 	 * @return {Array}
 	 */
-	function buildElementDependency(){
-		/**
-		 * Поиск тэга-источника данных для переданного элемента
-		 * @param {Element} elem
-		 * @param {Element} t_node
-		 * @param {Element} template
-		 * @return {Element}
-		 */
-		function findSource(elem, t_node, template){
-			if (!elem) 
-				return null;
-			
-			var xpath, nodes, result;
-			
-			
-			var d = elem.ownerDocument;
-			var root_source = xsl_tracer.utils.xpathFind('source', d.documentElement);
-//				var root_source = xsl_tracer.utils.xpath.selectSingle('source', d, d.documentElement);
-			var source = findParent(elem, 'source');
-			
-			if (source == root_source) {
-				// похоже, элемент был сформирован самим шаблоном, 
-				// поэтому источник ищем в нем
-				xpath = xsl_tracer.utils.createXPath(elem, t_node, 
-					function(/* Element */n){
-						return (n.nodeName == 'LRE') 
-							? n.getAttribute('name') 
-							: n.nodeName;
-					}
-				);
-				
-//					nodes = template.ownerDocument.evaluate(xpath, template, nsResolver, XPathResult.ANY_TYPE, null);
-//					result = nodes.iterateNext();
-				result = xsl_tracer.utils.xpathFind(xpath, template);
-//					result = xsl_tracer.utils.xpath.selectSingle(xpath, template.ownerDocument, template);
-				
-//					console.log(xpath, result, source);
-			}
-			
-			if (!result) {
-				// попали сюда, потому что либо в поиске по шаблону
-				// ничего не нашли, либо элемент действительно пришел
-				// из источника
-				xpath = source.getAttribute('node');
-//					nodes = docs.source.evaluate(xpath, docs.source, nsResolver, XPathResult.ANY_TYPE, null);
-//					result = nodes.iterateNext();
-				
-				result = xsl_tracer.utils.xpathFind(xpath, docs.source);
-			}
-			
-			return result;
-		
-		}
-		
-		/** Expand entity */
-		function ee (str, name){
-			if (!str)
-				return '';
-			str = docs.entities.expandEntity(str, docs.templates.getEntityFileName(name));
-			return xsl_tracer.utils.normalizeSpace(str);
-		}
-		
-		/**
-		 * Поиск xsl-шаблона
-		 * @param {Element} elem
-		 * @return {Element}
-		 */
-		function findTemplate(elem){
-			if (!elem) 
-				return null;
-				
-			
-			/** Название шаблона, в котором ведется поиск */
-			var module_name = elem.getAttribute('module');
-			
-			/** 
-			 * Документ шаблона, в котором ведется поиск
-			 * @type {Document} 
-			 */
-			var module = docs.templates.find(module_name);
-			if (!module) {
-                throw new Error('Не могу найти модуль ' + module_name)
-			}
-			
-			var params = {
-				name  : elem.getAttribute('name'),
-				match : elem.getAttribute('match'),
-				mode  : elem.getAttribute('mode')
-			};
-			
-			
-			var result = null;
-			
-			$.each(module.getElementsByTagNameNS(ns_map.xsl, 'template'), function(i, /* Element */node){
-				if (params.name && node.getAttribute('name') != params.name) return;
-				if (params.match && ee(node.getAttribute('match'), module_name) != params.match) return;
-				if (params.mode && node.getAttribute('mode') != params.mode) return;
-				
-				// если дошли до этого места — мы нашли нужный нам шаблон, 
-				// поэтому прекращаем поиски 
-				result = node;
-				return false;
-			});
-			
-			return result;
-		}
-	
-		/**
-		 * Поиск родителя с заданным названием тэга
-		 * @param {Element} elem
-		 * @param {String} node_name
-		 * @return {Element}
-		 */
-		function findParent(elem, node_name) {
-			var result = null;
-			node_name = node_name.toLowerCase();
-			do{
-				if (elem.nodeName.toLowerCase() == node_name) {
-					result = elem;
-					break;
-				}
-			}while(elem = elem.parentNode);
-			
-			return result;
-		}
-		
-		var trace_deps = buildTraceDeps();
-		
-		var result = [];
-		var elems = $.makeArray(docs.trace.documentElement.getElementsByTagName('LRE'));
-		elems = elems.concat($.makeArray(docs.trace.documentElement.getElementsByTagNameNS(ns_map.xsl, 'element')));
-		
-		$.each(elems, function(i, /* Element */node){
-			// TODO научиться работать с комментариями, пришедшими в результатирующий документ
-			
-			var r = trace_deps.findMatch(node, 'trace');
-			
-			var template_node = findParent(node, 'xsl:template');
-			var template = findTemplate(template_node);
-			
-			
-			var d = {
-				trace: node,
-				source: findSource(node, template_node, template),
-				module: template_node.getAttribute('module'),
-				template: template,
-				// FIXME в Опере результат всегда равен null, разобраться, почему
-				result: r ? r.result.ref : null
-			};
-			
-			result.push(d);
-		});
-		
-		return result;
-	}
-	
-	/**
-	 * Функция, которая строит зависимости между итоговыми элементами,
-	 * источником данных и шаблонами. В результате получается самая главная
-	 * структура, позволающая определить, откуда пришел итоговый элемент.<br><br>
-	 * 
-	 * Метод бегает по <code>docs.trace</code> в поисках LRE-элементов (Literal Resource Element), 
-	 * которые представляют собой итоговые элементы, попавшие в <code>docs.result</code>. 
-	 * Для каждого элемента находится источник, из которого он пришел, а также шаблон,
-	 * который его вывел. После этого LRE-элементам ставятся соответствия с элементами
-	 * результатирующего документа.<br><br>
-	 * 
-	 * Функция возвращает массив хэшей со следующими параметрами:<br>
-	 * <b>trace</b> : Element — трассировочный элемент из <code>docs.trace</code><br>
-	 * <b>source</b> : Element — источник данных из <code>docs.source</code><br>
-	 * <b>template</b> : Element — шаблон, которые вывел элемент<br>
-	 * <b>result</b> : Element — результатирующий элемент из <code>docs.result</code><br>
-	 * 
-	 * @return {Array}
-	 */
 	function buildElementDependencyJSON(){
 		/**
 		 * Поиск тэга-источника данных для переданного элемента
@@ -679,59 +505,6 @@ var xsl_tracer = function() {
 		
 		return result;
 	}
-	
-	/**
-	 * Строит зависимости между элементами трассировочного и результатирующего
-	 * документа
-	 * 
-	 *  @return {Array}
-	 */
-	function buildTraceDeps(){
- 		function walkInTwoDocs(node1, node2, func){
-	        func(node1, node2);
-	        node1 = node1.firstChild;
-	        node2 = node2.firstChild;
-	        while (node1 && node2) {
-	            walkInTwoDocs(node1, node2, func);
-	            node1 = node1.nextSibling;
-            	node2 = node2.nextSibling;
-	        }
- 		}
- 		
- 		var trace_tree = xsl_tracer.utils.filterTree(
- 			docs.trace.documentElement, 
- 			function(/* Element */ elem){
- 				return (elem.nodeType == 1 && (elem.nodeName == 'LRE' || elem.nodeName.toLowerCase() == 'xsl:element'));
- 			}
- 		);
- 		
- 		var result_tree = xsl_tracer.utils.filterTree(
- 			docs.result.documentElement, 
- 			function(/* Element */ elem){
- 				return (elem.nodeType == 1 && elem.nodeName != 'BASE');
- 			}
- 		);
- 		
- 		var elem_deps = [];
- 		walkInTwoDocs(result_tree, trace_tree, function(n1, n2){
- 			elem_deps.push({
- 				result: n1,
- 				trace: n2
- 			}); 
- 		});
- 		
- 		elem_deps.findMatch = function(node, type){
- 			var result = null;
- 			$.each(elem_deps, function(i, n){
- 				if (n[type].ref == node) {
- 					result = n;
- 					return false;
- 				}
- 			});
- 			return result;
- 		}
- 		return elem_deps;
- 	}
  	
 	/**
 	 * Строит зависимости между элементами трассировочного и результатирующего
@@ -774,6 +547,25 @@ var xsl_tracer = function() {
  	}
  	
  	/**
+ 	 * Search for distinct XSL modules in trace document and returns them.
+ 	 * @param {Object} doc Trace doc (JSON)
+ 	 * @return {Array}
+ 	 */
+ 	function findModules(doc) {
+ 		var _mod_lookup = {},
+ 			result = [];
+ 			
+ 		walkTraceDoc(function(elem) {
+ 			if (elem.meta && elem.meta.m && !(elem.meta.m in _mod_lookup)) {
+				result.push(elem.meta.m);
+				_mod_lookup[elem.meta.m] = true;
+ 			}
+ 		}, doc);
+ 		
+ 		return result;
+ 	}
+ 	
+ 	/**
 	 * Вспомогательная функция для загрузки одного файла
 	 * 
 	 * @param {String} url Адрес файла
@@ -797,8 +589,10 @@ var xsl_tracer = function() {
 			if (data_type == 'json') {
 				if (typeof data == 'string')
 					data = JSON.parse(data);
-				preprocessTraceDoc(data);
 			}
+			
+			if (doc_type == 'trace')
+				preprocessTraceDoc(data);
 			
 			if (docs[doc_type] && docs[doc_type].add) {
 				docs[doc_type].add(url, data);
@@ -907,10 +701,15 @@ var xsl_tracer = function() {
 
 		template_path = params.template_path;
 		
+		loadFile(params.trace_url, 'trace', 'json', function(doc) {
+			$.each(findModules(doc), function(i, n) {
+				loadFile(template_path + n, 'templates');
+			});
+		});
 		loadFile(params.source_url, 'source', 'xml');
-		loadFile(params.trace_url, 'trace', 'json');
 		loadFile(params.result_url, 'result', 'xml');
-		loadFile(template_path + params.template_file, 'templates');
+		
+//		loadFile(template_path + params.template_file, 'templates');
 
 
 		// ожидаем завершения загрузки всех файлов
