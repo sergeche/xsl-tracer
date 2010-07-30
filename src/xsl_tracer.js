@@ -171,6 +171,32 @@ var xsl_tracer = function() {
 	}
 	
 	/**
+	 * Returns list of referenced DTD/entity files in XSL template
+	 * @param {String} template XSL template
+	 * @return {Array}
+	 */
+	function getEntityFiles(template) {
+		var result = [], 
+			m;
+		
+		// find system entities
+		m = template.match(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i);
+		if (m && m[1])
+			result.push(m[1]);
+		
+		// find inline entities
+		m = template.match(/<\!DOCTYPE\s+xsl:stylesheet\s+\[(.+?)\]\s*>/i);
+		if (m && m[1]) {
+			// search for inline entity references
+			m[1].replace(/<\!ENTITY\s+%\s+.+\s+SYSTEM\s+['"](.+?)['"]\s*>/, function(str, file) {
+				result.push(file);
+			});
+		}
+		
+		return result;
+	}
+	
+	/**
 	 * Контейнер шаблонов. Наследуется от <code>fileContainer()</code>
 	 */
 	function templateContainer(){
@@ -250,7 +276,7 @@ var xsl_tracer = function() {
 		 * @return {Object}
 		 */
  		function parse(text){
-			var re_entity_def = /<!ENTITY\s+(.+?)\s+['"](.+?)['"]\s*>/ig;
+			var re_entity_def = /<!ENTITY\s+([^%]+?)\s+['"](.+?)['"]\s*>/ig;
 			var re_entity = /&([^#]+?);/g;
 			var m;
 			var result = {};
@@ -317,6 +343,8 @@ var xsl_tracer = function() {
 		entities : entityContainer()
 	};
 	
+	var emptyFn = function(){return ''};
+	
 	/**
 	 * Убирает энтити из текста, тем самым подготавливая его для нормального 
 	 * парсинга в xml. Необязательный параметр <code>callback</code> 
@@ -326,8 +354,12 @@ var xsl_tracer = function() {
 	 * @return {String}   
 	 */
 	function escapeEntity(text, callback) {
-		callback = callback || function(){return '';};
-		text = text.replace(/<\!DOCTYPE\s+.+?\s+SYSTEM\s+['"](.+?)['"]>/i, callback);
+		callback = callback || emptyFn;
+		// replace system entities
+		text = text.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]>/i, callback);
+		
+		// replace inline entities
+		text = text.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+\[(.+?)\]>/i, callback);
 		// эскейпим энтити, чтоб не мешали в преобразовании в xml
 		return text.replace(/&(?!#|x\d)/gi, '&amp;');
 	}
