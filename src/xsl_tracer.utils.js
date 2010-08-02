@@ -10,6 +10,35 @@
  */
 xsl_tracer.utils = function(){
 	/**
+	 * Split text into lines. Set <code>remove_empty</code> to true to filter
+	 * empty lines
+	 * @param {String} text
+	 * @param {Boolean} [remove_empty]
+	 * @return {Array}
+	 */
+	function splitByLines(text, remove_empty) {
+		// IE fails to split string by regexp, 
+		// need to normalize newlines first
+		// Also, Mozilla's Rhiho JS engine has a wierd newline bug
+		var nl = '\n';
+		var lines = (text || '')
+			.replace(/\r\n/g, '\n')
+			.replace(/\n\r/g, '\n')
+			.replace(/\n/g, nl)
+			.split(nl);
+		
+		if (remove_empty) {
+			for (var i = lines.length; i >= 0; i--) {
+				if (!trim(lines[i]))
+					lines.splice(i, 1);
+			}
+		}
+		
+		return lines;
+	}
+	
+	
+	/**
 	 * Вспомогательная структура для хранения дерева документа
 	 * @param {Element} node
 	 */
@@ -357,6 +386,57 @@ xsl_tracer.utils = function(){
 				
 			}
 			return walkTree(context.nodeType == 9 ? [context.documentElement] : context.childNodes);
+		},
+		
+		/**
+		 * Adds line and column positions for every tag in document
+		 * @param {String} XHTML document
+		 * @return {String} Same document with <code>xsltrace-line</code> and
+		 * <code>xsltrace-column</code> in every tag
+		 */
+		markTagsPosition: function(content) {
+			var line = 1,
+				column = 0,
+				ch = 0,
+				l = content.length,
+				buffer = [],
+				buf_start = 0,
+				m,
+				re_tag = /^<([\w\:\-]+)((?:[\s\n\r]+[\w\-:]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)[\s\n\r]*(\/?)>/;
+				
+			while (ch < l) {
+				column++;
+				switch (content.charAt(ch)) {
+					case '<':
+						if (m = content.substr(ch, 300).match(re_tag)) {
+							// found tag, remember its line and column
+							buffer.push(content.substring(buf_start, ch));
+							var line_count = splitByLines(m[0]).length,
+								cur_line = line + (line_count > 1 ? '-' + (line + line_count) : ''),
+								cur_column = column + '-' + (column + m[0].length);
+								
+							buffer.push(m[0].replace(/(\s*\/?>)$/, 
+								' xsltrace-line="' + cur_line +'"' +
+								' xsltrace-column="' + cur_column + '"$1'));
+								
+							buf_start = ch + m[0].length;
+							ch += m[0].length - 1;
+						}
+						break;
+					case '\n':
+						if (content.charAt(ch + 1) == '\r')
+							ch++;
+						
+						line++;
+						column = 0;
+						break;
+				}
+				
+				ch++;
+			}
+			
+			buffer.push(content.substr(buf_start));
+			return buffer.join('');
 		}
 	};
 }();
