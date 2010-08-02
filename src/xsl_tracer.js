@@ -6,10 +6,10 @@
  * 
  * @include "EventDispatcher.js"
  * @include "xsl_tracer.utils.js"
+ * @include "xsl_tracer.entity.js"
  * @include "JSON.js"
  *
  * TODO выводить комментарии в шаблонах
- * FIXME баг при клике на <div class="r"> http://sweets.dev.design.ru/centre/awards/?mode=xsltrace
  * TODO Добавить call stack для соотвествия
  * TODO Добвить раскрытие/сворачивание энтити для шаблонов
  */
@@ -171,32 +171,6 @@ var xsl_tracer = function() {
 	}
 	
 	/**
-	 * Returns list of referenced DTD/entity files in XSL template
-	 * @param {String} template XSL template
-	 * @return {Array}
-	 */
-	function getEntityFiles(template) {
-		var result = [], 
-			m;
-		
-		// find system entities
-		m = template.match(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i);
-		if (m && m[1])
-			result.push(m[1]);
-		
-		// find inline entities
-		m = template.match(/<\!DOCTYPE\s+xsl:stylesheet\s+\[(.+?)\]\s*>/i);
-		if (m && m[1]) {
-			// search for inline entity references
-			m[1].replace(/<\!ENTITY\s+%\s+.+\s+SYSTEM\s+['"](.+?)['"]\s*>/, function(str, file) {
-				result.push(file);
-			});
-		}
-		
-		return result;
-	}
-	
-	/**
 	 * Контейнер шаблонов. Наследуется от <code>fileContainer()</code>
 	 */
 	function templateContainer(){
@@ -215,97 +189,20 @@ var xsl_tracer = function() {
 			var real_name = name;
 			name = name.substr(template_path.length);
 			
-			var entity_file;
 			// вырезаем ссылку на энтити
-			var text_data = escapeEntity(content, function(str, p1){
-				// грузим файл с энтити
-				entity_file = p1;
-				loadFile(resolvePath(entity_file, 'dtd'), 'entities');
-				return '';
-			});
-			
-			// запоминаем ссылку на энтити-файл
-			entities[name] = entity_file;
-			
-			var doc = xsl_tracer.utils.toXML(text_data);
+			content = xsl_tracer.entity.processModule(real_name, content);
+			var doc = xsl_tracer.utils.toXML(content);
 			if (!doc)
-				console.log(name, real_name);
+				console.error(name, real_name);
 				
 			indexTree(doc);
 			
 			uber_add(name, doc);
 		}
 		
-		/**
-		 * Возвращает название энтити-файла, привязанного к шаблону 
-		 * <code>name</code>
-		 * 
-		 * @param {String} name Название шаблона
-		 * @return {String}
-		 */
-		cont.getEntityFileName = function(name){
-			return entities[name];
-		}
-		
 		return cont;
 	}
 	
-	/**
-	 * Контейнер энтити. Наследуется от <code>fileContainer()</code>
-	 */
-	function entityContainer(){
-		/**
- 		 * Раскрывает строку с энтитями — заменяет все энтити на их значения
- 		 * @param {String} str Строка с энтити
- 		 * @param {String, Object} module Хэш значений энтити. Можно передать название уже существующего модуля в виде строки
- 		 * @return {String}
- 		 */
- 		function expandEntity(str, module){
- 			var re_entity = /&([^#]+?);/g;
- 			
- 			var struct = (typeof module == 'string') ? this.find(module) : module;
- 			return str.replace(re_entity, function(str, p1){
-				return struct[p1];
-			});
- 		}
-		
-		/**
-		 * Находит все описания энтити и сохраняет их в хэш.
-		 * Энтити, ссылающиеся на дргие энтити, автоматически раскрываются.
-		 * @param {String} text Содержимое DTD-файла
-		 * @return {Object}
-		 */
- 		function parse(text){
-			var re_entity_def = /<!ENTITY\s+([^%]+?)\s+['"](.+?)['"]\s*>/ig;
-			var re_entity = /&([^#]+?);/g;
-			var m;
-			var result = {};
-			
-			// ищем определения энтитей 
-			while ((m = re_entity_def.exec(text))) {
-				result[m[1]] = m[2];
-			}
-			
-			//раскрываем энтити, ссылающиеся на другие энтити
-			$.each(result, function(ent, /* String */value){
-				result[ent] = xsl_tracer.utils.normalizeSpace(expandEntity(value, result));
-			});
-			
-			return result;
-		}
-		
-		var cont = fileContainer();
-		
-		var uber_add = cont.add;
-		cont.add = function(name, content){
-			uber_add(xsl_tracer.utils.getFileName(name), parse(content));
-		}
-		
-		cont.expandEntity = expandEntity;
-		
-		return cont;
-	}
-
 	/** xml-документы, необходимые для дебага */
 	var docs = {
 		/**
@@ -340,29 +237,10 @@ var xsl_tracer = function() {
 		 * Набор всех entity-файлов. При добавлении файла он автоматически
 		 * парсится, и сохраняется только набор entity 
 		 */
-		entities : entityContainer()
+		entities : null
 	};
 	
 	var emptyFn = function(){return ''};
-	
-	/**
-	 * Убирает энтити из текста, тем самым подготавливая его для нормального 
-	 * парсинга в xml. Необязательный параметр <code>callback</code> 
-	 * используется как функция замены ссылок на энтити-файл
-	 * @param {String} text   
-	 * @param {Function} [callback]
-	 * @return {String}   
-	 */
-	function escapeEntity(text, callback) {
-		callback = callback || emptyFn;
-		// replace system entities
-		text = text.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]>/i, callback);
-		
-		// replace inline entities
-		text = text.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+\[(.+?)\]>/i, callback);
-		// эскейпим энтити, чтоб не мешали в преобразовании в xml
-		return text.replace(/&(?!#|x\d)/gi, '&amp;');
-	}
 	
 	/**
 	 * Resolves path to file name, making it usable for downloading
@@ -438,7 +316,7 @@ var xsl_tracer = function() {
 		function ee (str, name){
 			if (!str)
 				return '';
-			str = docs.entities.expandEntity(str, docs.templates.getEntityFileName(name));
+			str = xsl_tracer.entity.getEntity(str, resolvePath(name, 'xsl'));
 			return xsl_tracer.utils.normalizeSpace(str);
 		}
 		
@@ -606,9 +484,12 @@ var xsl_tracer = function() {
 		loadFile.query_cache.push(url);
 		loadFile.num_loading++;
 
-        EVENT.LOAD_FILE_START
-
-		dispatcher.dispatchEvent(EVENT.LOAD_FILE_START, {url : url});
+		var evt_data = {
+			url: url,
+			doc_type: doc_type
+		};
+		
+		dispatcher.dispatchEvent(EVENT.LOAD_FILE_START, evt_data);
 		
 		var loadSuccess = function(data) {
 			
@@ -629,9 +510,9 @@ var xsl_tracer = function() {
 			if (data_type == 'xml')
 				indexTree(data);
 
-			dispatcher.dispatchEvent(EVENT.LOAD_FILE_COMPLETE, {url : url});
+			dispatcher.dispatchEvent(EVENT.LOAD_FILE_COMPLETE, evt_data);
 			if (callback) {
-				callback(data);
+				callback(data, url);
 			}
 			loadFile.num_loading--;
 		};
@@ -660,7 +541,7 @@ var xsl_tracer = function() {
 					// ошибка парсинга часто возникает тогда, когда
 					// не найден SYSTEM-доктайп, поэтому удалим ссылку
 					// на его в файле и попытаемся заново распарсить
-					var text_data = escapeEntity(xhr.responseText);
+					var text_data =  xsl_tracer.entity.cleanup(xhr.responseText);
 					
 					var parsed_xml = xsl_tracer.utils.toXML(text_data);
 					
@@ -838,6 +719,10 @@ var xsl_tracer = function() {
 		 */
 		setPathResolver: function(fn) {
 			resolvePath = fn;
-		}
+		},
+		
+		resolvePath: resolvePath,
+		
+		loadFile: loadFile
 	}
 }();
