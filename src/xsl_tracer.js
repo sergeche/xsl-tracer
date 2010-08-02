@@ -32,6 +32,11 @@ var xsl_tracer = function() {
 		html: 'http://www.w3.org/1999/xhtml'
 	};
 	
+	/**
+	 * Index for XML/XSL elements built by element's line and column positions 
+	 */
+	var templates_line_index = {};
+	
 	function nsResolver(prefix){
 		var ns = ns_map[prefix];
 		if (!ns) {
@@ -189,6 +194,8 @@ var xsl_tracer = function() {
 			var real_name = name;
 			name = name.substr(template_path.length);
 			
+			content = xsl_tracer.utils.markTagsPosition(content);
+			
 			// вырезаем ссылку на энтити
 			content = xsl_tracer.entity.processModule(real_name, content);
 			var doc = xsl_tracer.utils.toXML(content);
@@ -196,11 +203,74 @@ var xsl_tracer = function() {
 				console.error(name, real_name);
 				
 			indexTree(doc);
+			rememberElementLines(real_name, doc);
+			cleanupDocument(doc);
 			
 			uber_add(name, doc);
 		}
 		
 		return cont;
+	}
+	
+	/**
+	 * Relement all element's line and column positions for faster lookup
+	 * @param {String} name
+	 * @param {Document} doc
+	 * @return {Array} List of indexed tags 
+	 */
+	function rememberElementLines(name, doc) {
+		var result = [];
+		$('*', doc).each(function(i, n) {
+			var lines = n.getAttribute('xsltrace-line').split('-'),
+				cols = n.getAttribute('xsltrace-column').split('-')
+				
+			result.push({
+				elem: n,
+				start_line: parseInt(lines[0], 10),
+				end_line: parseInt(lines[1] || lines[0], 10),
+				start_column: parseInt(cols[0], 10),
+				end_column: parseInt(cols[1] || cols[0], 10)
+			});
+		});
+		
+		result.sort(function(a, b) {
+			return a.start_line - b.start_line
+		});
+		
+		return templates_line_index[name] = result;
+	}
+	
+	/**
+	 * Search for element in XML file by its line and column
+	 * @param {String} XML/XSL module name
+	 * @param {Number} line Element's line
+	 * @param {Number} col Element's column
+	 * @return {Element}
+	 */
+	function searchTagByLineCol(name, line, col) {
+		line = parseInt(line, 10);
+		col = parseInt(col, 10);
+		var result;
+		if (name in templates_line_index) {
+			$.each(templates_line_index[name], function(i, n) {
+				if (line >= n.start_line && line <= n.end_line && col >= n.start_column && col <= n.end_column) {
+					result = n.elem;
+					return false;
+				}
+			});
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Remove extra data from XML document added by XSL tracer
+	 * @param {Document} doc
+	 * @return {Document}
+	 */
+	function cleanupDocument(doc) {
+		$('*', doc).removeAttr('xsltrace-line').removeAttr('xsltrace-column');
+		return doc;
 	}
 	
 	/** xml-документы, необходимые для дебага */
@@ -329,34 +399,7 @@ var xsl_tracer = function() {
 			if (!elem) 
 				return null;
 				
-			
-			/** Название шаблона, в котором ведется поиск */
-			var module_name = elem.meta.m;
-			
-			/** 
-			 * Документ шаблона, в котором ведется поиск
-			 * @type {Document} 
-			 */
-			var module = docs.templates.find(module_name);
-			if (!module) {
-                throw new Error('Не могу найти модуль ' + module_name)
-			}
-			
-			var params = elem.attrs || {}; 
-			var result = null;
-			
-			$.each(module.getElementsByTagNameNS(ns_map.xsl, 'template'), function(i, /* Element */node){
-				if (params.name && node.getAttribute('name') != params.name) return;
-				if (params.match && ee(node.getAttribute('match'), module_name) != params.match) return;
-				if (params.mode && node.getAttribute('mode') != params.mode) return;
-				
-				// если дошли до этого места — мы нашли нужный нам шаблон, 
-				// поэтому прекращаем поиски 
-				result = node;
-				return false;
-			});
-			
-			return result;
+			return searchTagByLineCol(resolvePath(elem.meta.m, 'xsl'), elem.meta.l, elem.meta.c);
 		}
 	
 		/**
@@ -393,13 +436,12 @@ var xsl_tracer = function() {
 			var r = trace_deps.findMatch(node, 'trace');
 			
 			var template_node = findParent(node, 'xsl:template');
-			var template = findTemplate(template_node);
 			
 			var d = {
 				trace: node,
 				source: findSource(template_node),
 				module: template_node.meta.m,
-				template: template,
+				template: findTemplate(template_node),
 				// FIXME в Опере результат всегда равен null, разобраться, почему
 				result: r ? r.result : null
 			};
