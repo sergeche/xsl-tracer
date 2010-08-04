@@ -59,8 +59,9 @@ xsl_tracer.ui = function(){
 	 * Отрисовка источника данных
 	 */
 	function drawSource(){
+		var sources = xsl_tracer.getDocument('source');
 		$('#xsldbg-source .xsldbg-content').empty()
-			.append(drawXml(xsl_tracer.getDocument('source')));
+			.append(drawXml(xsl_tracer.getDocument('source', sources[0])));
 	}
 	
 	/**
@@ -166,6 +167,10 @@ xsl_tracer.ui = function(){
 	
 	function showTemplate(name){
 		if (current_template != name) {
+			var ix = parseInt(name);
+			if (!isNaN(ix))
+				name = ix;
+			
 			$('#xsldbg-template .xsldbg-content').empty()
 				.append(drawXml(xsl_tracer.getDocument('templates', name)));
 			

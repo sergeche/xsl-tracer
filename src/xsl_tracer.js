@@ -87,8 +87,8 @@ var xsl_tracer = function() {
 	 * Вспомогательная структура для хранения файлов
 	 */
 	function fileContainer(){
-		var files = {};
-		var count = 0;
+		var files = {},
+			count = 0;
 		
 		return {
 			/**
@@ -134,6 +134,14 @@ var xsl_tracer = function() {
 				});
 				
 				return result;
+			},
+			
+			/**
+			 * @param {Number} ix
+			 * @return {String}
+			 */
+			get: function(ix) {
+				return this.find( this.getList()[parseInt(ix)] ); 
 			}
 		};
 	};
@@ -192,7 +200,7 @@ var xsl_tracer = function() {
 			 * и самостоятельно загрузить энтити-файл.
 			 */
 			var real_name = name;
-			name = name.substr(template_path.length);
+//			name = name.substr(template_path.length);
 			
 			content = xsl_tracer.utils.markTagsPosition(content);
 			
@@ -287,7 +295,7 @@ var xsl_tracer = function() {
 		 * 
 		 * @type {Document}
 		 */
-		source : null,
+		source : fileContainer(),
 
 		/**
 		 * Результат работы xsl-преобразования (как правило, это HTML-документ, 
@@ -379,7 +387,8 @@ var xsl_tracer = function() {
 			if (!template_node || !template_node.src || !template_node.src.x) 
 				return null;
 			
-			return  xsl_tracer.utils.xpathFind(template_node.src.x, docs.source);
+			var source_doc = docs.source.get(template_node.src.f === 'SOURCE' ? 0 : template_node.src.f);
+			return  xsl_tracer.utils.xpathFind(template_node.src.x, source_doc);
 		}
 		
 		/** Expand entity */
@@ -399,7 +408,8 @@ var xsl_tracer = function() {
 			if (!elem) 
 				return null;
 				
-			return searchTagByLineCol(resolvePath(elem.meta.m, 'xsl'), elem.meta.l, elem.meta.c);
+			var module_name = docs.templates.getList()[elem.meta.m];
+			return searchTagByLineCol(module_name, elem.meta.l, elem.meta.c);
 		}
 	
 		/**
@@ -490,25 +500,6 @@ var xsl_tracer = function() {
  		}
  		
  		return elem_deps;
- 	}
- 	
- 	/**
- 	 * Search for distinct XSL modules in trace document and returns them.
- 	 * @param {Object} doc Trace doc (JSON)
- 	 * @return {Array}
- 	 */
- 	function findModules(doc) {
- 		var _mod_lookup = {},
- 			result = [];
- 			
- 		walkTraceDoc(function(elem) {
- 			if (elem.meta && elem.meta.m && !(elem.meta.m in _mod_lookup)) {
-				result.push(elem.meta.m);
-				_mod_lookup[elem.meta.m] = true;
- 			}
- 		}, doc);
- 		
- 		return result;
  	}
  	
  	/**
@@ -650,12 +641,17 @@ var xsl_tracer = function() {
 
 		template_path = params.template_path;
 		
-		loadFile(params.trace_url, 'trace', 'json', function(doc) {
-			$.each(findModules(doc), function(i, n) {
-				loadFile(resolvePath(n, 'xsl'), 'templates');
+		loadFile(params.source_url, 'source', 'xml', function(){
+			loadFile(params.trace_url, 'trace', 'json', function(doc) {
+				$.each(doc['xsl'], function(i, n) {
+					loadFile(resolvePath(n, 'xsl'), 'templates');
+				});
+				$.each(doc['xml'], function(i, n) {
+					loadFile(resolvePath(n, 'xml'), 'source');
+				});
 			});
 		});
-		loadFile(params.source_url, 'source', 'xml');
+		
 		loadFile(params.result_url, 'result', 'xml');
 		
 		// ожидаем завершения загрузки всех файлов
@@ -724,6 +720,9 @@ var xsl_tracer = function() {
 		getDocument: function(type, module){
 			var d = docs[type];
 			if (d.add) { // это контейнер
+				if (typeof module == 'number')
+					return d.get(module);
+					
 				return (module) ? d.find(module) : d.getList();
 			} else {
 				return d;
