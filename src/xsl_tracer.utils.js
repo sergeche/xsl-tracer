@@ -4,7 +4,7 @@
  * 
  * @include "xsl_tracer.js"
  */
- 
+
 /**
  * Вспомогательные утилиты
  */
@@ -35,6 +35,10 @@ xsl_tracer.utils = function(){
 		}
 		
 		return lines;
+	}
+	
+	function startsWith(str, chars) {
+		return str.indexOf(chars) === 0;
 	}
 	
 	
@@ -206,39 +210,39 @@ xsl_tracer.utils = function(){
 		 * @author Douglas Crockford 
 		 */
 		walkTheDOM: function(node, func) {
-	        func(node);
-	        node = node.firstChild;
-	        while (node) {
-	            this.walkTheDOM(node, func);
-	            node = node.nextSibling;
-	        }
-	    },
-	    
-	    /**
-	     * Нормализация строки: удаляются все переносы строк, несколько идущих 
-	     * подряд пробелов заменяются на один, удаляются пробелы в начале 
-	     * и в конце строки
-	     * @param {String} str
-	     * @return {String}
-	     */
-	    normalizeSpace: function(str){
- 			// удаляем все переносы строк
- 			str = str.replace(/[\n\r]/g, '');
- 			
- 			// все пробельные символы заменяем на один пробел
- 			str = str.replace(/\s+/g, ' ');
- 			
- 			// удаляем проблелы в начале и в конце
- 			str = $.trim(str);
- 			
- 			return str;
- 		},
- 		
- 		/**
- 		 * Рекурсивно удаляет все пробельные ноды у элемента и его потомков
- 		 * @param {Element} element Элемент, у которого нужно удалить пробельные ноды  
- 		 */
- 		cleanWhitespace: function(element) { 
+			func(node);
+			node = node.firstChild;
+			while (node) {
+				this.walkTheDOM(node, func);
+				node = node.nextSibling;
+			}
+		},
+		
+		/**
+		 * Нормализация строки: удаляются все переносы строк, несколько идущих 
+		 * подряд пробелов заменяются на один, удаляются пробелы в начале 
+		 * и в конце строки
+		 * @param {String} str
+		 * @return {String}
+		 */
+		normalizeSpace: function(str){
+			// удаляем все переносы строк
+			str = str.replace(/[\n\r]/g, '');
+			
+			// все пробельные символы заменяем на один пробел
+			str = str.replace(/\s+/g, ' ');
+			
+			// удаляем проблелы в начале и в конце
+			str = $.trim(str);
+			
+			return str;
+		},
+		
+		/**
+		 * Рекурсивно удаляет все пробельные ноды у элемента и его потомков
+		 * @param {Element} element Элемент, у которого нужно удалить пробельные ноды  
+		 */
+		cleanWhitespace: function(element) { 
 			// If no element is provided, do the whole HTML document 
 			element = element || document;
 			// Use the first child as a starting point 
@@ -259,17 +263,17 @@ xsl_tracer.utils = function(){
 		},
 		
 		/**
- 		 * Строит упрощенное дерево из определенных элементов документа. 
- 		 * Необходимость добавления элемента в дерево определяется с помощью 
- 		 * функции <code>compare</code>, которая должна вернуть <code>true</code>,
- 		 * если элемент нужно добавить.<br><br>
- 		 * 
- 		 * Этим методом удобно пользоваться тогда, когда необходимо отфильтровать
- 		 * определенные элементы дерева (например, удалить все текстовые ноды),
- 		 * сохраняя порядок и структуру элементов документа.<br><br>
- 		 * 
- 		 * Результатом работы функции является новое дерево, построенное
- 		 * из объектов класса <code>SimpleNode</code>.
+		 * Строит упрощенное дерево из определенных элементов документа. 
+		 * Необходимость добавления элемента в дерево определяется с помощью 
+		 * функции <code>compare</code>, которая должна вернуть <code>true</code>,
+		 * если элемент нужно добавить.<br><br>
+		 * 
+		 * Этим методом удобно пользоваться тогда, когда необходимо отфильтровать
+		 * определенные элементы дерева (например, удалить все текстовые ноды),
+		 * сохраняя порядок и структуру элементов документа.<br><br>
+		 * 
+		 * Результатом работы функции является новое дерево, построенное
+		 * из объектов класса <code>SimpleNode</code>.
 		 * @param {Element} node Начальный элемент, от которого нужно строить дерево 
 		 * @param {Function} compare Функция сравнения, которая должна вернуть true или false. В качестве аргумента приходит объект класса <code>Element</code>
 		 * @return {SimpleNode}
@@ -277,24 +281,24 @@ xsl_tracer.utils = function(){
 		filterTree: function(node, compare, trace){
 			var result;
 			
-	 		function buildResultTree(node, parent){
-	 			if (compare(node)){
-	 				if (!parent) {
-	 					result = parent = new SimpleNode(node);
-	 				} else {
-			 			parent = parent.addChild(node);
-	 				}
-	 			}
-	 			
-		        node = node.firstChild;
-		        while (node) {
-		            buildResultTree(node, parent);
-		            node = node.nextSibling;
-		        }
-	 		}
-	 		
-	 		buildResultTree(node);
-	 		return result;
+			function buildResultTree(node, parent){
+				if (compare(node)){
+					if (!parent) {
+						result = parent = new SimpleNode(node);
+					} else {
+						parent = parent.addChild(node);
+					}
+				}
+				
+				node = node.firstChild;
+				while (node) {
+					buildResultTree(node, parent);
+					node = node.nextSibling;
+				}
+			}
+			
+			buildResultTree(node);
+			return result;
 		},
 		
 		/**
@@ -386,6 +390,57 @@ xsl_tracer.utils = function(){
 				
 			}
 			return walkTree(context.nodeType == 9 ? [context.documentElement] : context.childNodes);
+		},
+		
+		/**
+		 * 
+		 * @param {String} dirname
+		 * @param {String} file
+		 */
+		resolvePath: function(dirname, file) {
+			if (file.charAt(0) == '/') // absolute path
+				return file;
+			
+			if (dirname.charAt(dirname.length - 1) != '/')
+				dirname += '/';
+				
+			var path = dirname + file;
+			
+			// took from Python
+			var initial_slashes = startsWith(path, '/');
+//			POSIX allows one or two initial slashes, but treats three or more
+//			as single slash.
+			if (initial_slashes && startsWith(path, '//') && !startsWith(path, '///'))
+				initial_slashes = 2;
+				
+			var comps = path.split('/'),
+				new_comps = [];
+				
+			for (var i = 0, il = comps.length; i < il; i++) {
+				var comp = comps[i];
+				if (comp == '' || comp == '.')
+					continue;
+					
+				if (comp != '..' || (!initial_slashes && !new_comps.length) || 
+					(new_comps.length && new_comps[new_comps.length - 1] == '..'))
+					new_comps.push(comp);
+				else if (new_comps.length)
+					new_comps.pop();
+					
+			}
+			
+			comps = new_comps;
+			path = comps.join('/');
+			if (initial_slashes) {
+				var prefix = '';
+				do {
+					prefix += '/';
+				} while (--initial_slashes);
+				
+				path = prefix + path;
+			}
+			
+			return path || '.';
 		},
 		
 		/**

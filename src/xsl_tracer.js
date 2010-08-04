@@ -320,7 +320,7 @@ var xsl_tracer = function() {
 	 * @return {String}
 	 */
 	var resolvePath = function(filename, type) {
-		return template_path + filename;
+		return xsl_tracer.utils.resolvePath(template_path, filename);
 	}
 	
 	
