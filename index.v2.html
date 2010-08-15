@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>XSL Tracer</title>
-		<link rel="stylesheet" href="./css/xsldbg.css" />
+		<link rel="stylesheet" href="./css/colorizer.css" />
 		<script type="text/javascript" src="./v2/lib/jquery-1.4.2.min.js"></script>
 		<script type="text/javascript" src="./v2/lib/json2.js"></script>
 		<script type="text/javascript" src="./v2/lib/EventDispatcher.js"></script>
@@ -11,8 +11,10 @@
 		<script type="text/javascript" src="./v2/xsl_tracer.js"></script>
 		<script type="text/javascript" src="./v2/resource.js"></script>
 		<script type="text/javascript" src="./v2/utils.js"></script>
+		<script type="text/javascript" src="./v2/renderer.js"></script>
 	</head>
 	<body>
+		<div id="output"></div>
 		<script type="text/javascript">
 		 	xsl_tracer.init({
 		 		template_path: './test/xsl/',
@@ -20,6 +22,12 @@
 		 		trace_url: './test/out/simple.xhtml.json', 
 		 		result_url: './test/out/simple.xhtml'
 		 	});
+			
+			xsl_tracer.addEvent(EVT_COMPLETE, function(){
+				document.getElementById('output').appendChild(
+					renderer.renderXml(resource.getResource('result', 0))
+				);
+			});
 		</script>
 	</body>
 </html>

@@ -1,0 +1,88 @@
+.xt-clr-tag {
+	padding:0.25em 0 0.2em 20px;
+	font-family:monospace;
+	position:relative;
+	display: block;
+	margin:1px;
+	border:1px solid transparent;
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+	border-radius:5px;
+}
+
+.xt-clr-tag.hover{
+	background:#fefcf1;
+	border-color:#f2c202;
+}
+
+.xt-clr-tag.selected {
+	background:#f1fefe;
+	border-color:#02def2;
+}
+
+.xt-clr-tag-open, 
+.xt-clr-tag-close {
+	color:#1c8080;
+	cursor:pointer;
+	padding:2px;
+	display: block;
+}
+
+.xt-clr-attr {
+	color:#767676;
+}
+
+.xt-clr-attr-name {
+	color:#940083;
+}
+
+.xt-clr-attr-value {
+	color:#3e00ff;
+}
+
+.xt-clr-text {
+	color:#000;
+	padding-left: 20px;
+	display: block;
+}
+
+.xt-clr-tag-switcher {
+	width:15px;
+	height:1.1em;
+	position:absolute;
+	background:url(../i/collapse-icon.png) 0% 50% no-repeat;
+	left:4px;
+	top: 0.4em;
+	display:inline-block;
+	cursor:pointer;
+}
+
+.xt-collapsed > .xt-clr-tag-switcher {
+	background-position:-15px 50%;
+}
+
+.xt-collapsed .xt-clr-tag,
+.xt-collapsed .xt-clr-text {
+	display:none;
+}
+
+.xt-marked > .xt-clr-tag-open {
+	background:#ccf3d8;
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px 5px;
+	/* color:#fff !important; */
+}
+
+.xt-clr-one-line > .xt-clr-tag-open,
+.xt-clr-one-line > .xt-clr-tag-close,
+.xt-clr-one-line > .xt-clr-text {
+	display: inline;
+}
+
+.xt-clr-one-line > .xt-clr-text {
+	padding-left: 0;
+}
+
+.xt-clr-one-line > .xt-clr-tag-switcher {
+	display: none;
+}

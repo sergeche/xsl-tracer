@@ -75,30 +75,6 @@
 	}
 	
 	/**
-	 * Индексирует дерево элементов. Индексация представляет 
-	 * собой установку атрибута <b>xsldbg-id</b> с уникальным значением 
-	 * для элемента. Значение этого атрибута затем используется
-	 * внутри <code>SimpleNode.render</code> как атрибут <b>id</b> для
-	 * для генерируемого элемента.
-	 * 
-	 * @param {Element} node Элемент, с которого начинать индексацию
-	 */
-	function indexTree(node){
-		if (node) {
-			utils.each(node.getElementsByTagName('*'), function(i, /* Element */ n){
-				var id = indexTree.id++;
-				n.setAttribute('xsldbg-id', 'x' + id);
-				indexTree.cache[id] = n;
-			});
-		}
-		
-		return node;
-	};
-	
-	indexTree.id = 1;
-	indexTree.cache = [];
-	
-	/**
 	 * Removes extra data from XML document added by XSL tracer
 	 * @param {Document} doc
 	 * @return {Document}
@@ -178,7 +154,6 @@
 					error_data: data
 				});
 			} else {
-				indexTree(data);
 				return n.data = data;
 			}
 		};
