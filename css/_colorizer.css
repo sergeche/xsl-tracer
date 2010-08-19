@@ -1,5 +1,5 @@
 .xt-clr-tag {
-	padding:0.25em 0 0.2em 20px;
+	padding:0.25em 0 0.2em 15px;
 	font-family:monospace;
 	position:relative;
 	display: block;
@@ -48,10 +48,17 @@
 	height:1.1em;
 	position:absolute;
 	background:url(../i/collapse-icon.png) 0% 50% no-repeat;
-	left:4px;
+	left:0;
 	top: 0.3em;
 	display:inline-block;
 	cursor:pointer;
+	opacity:0;
+	-webkit-transition:opacity 0.2s linear 0;
+	transition:opacity 0.2s linear 0;
+}
+
+.xt-clr-tag:hover > .xt-clr-tag-switcher {
+	opacity:1;
 }
 
 .xt-collapsed > .xt-clr-tag-switcher {
