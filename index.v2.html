@@ -1,9 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>XSL Tracer</title>
-		<link rel="stylesheet" href="./css/colorizer.css" />
+		<link rel="stylesheet" href="./css/ui.css" />
 		<script type="text/javascript" src="./v2/lib/jquery-1.4.2.min.js"></script>
 		<script type="text/javascript" src="./v2/lib/json2.js"></script>
 		<script type="text/javascript" src="./v2/lib/EventDispatcher.js"></script>
@@ -14,7 +14,9 @@
 		<script type="text/javascript" src="./v2/renderer.js"></script>
 	</head>
 	<body>
-		<div id="output"></div>
+		<div id="xt-page">			<div id="xt-top-panel">Top panel</div>			<div id="xt-page-body">				<div id="xt-content"></div>			</div>			<div id="xt-trace-info">				<div class="xt-panel-header">XSL trace panel</div>
+				<div class="xt-section" id="xt-xsl-section">xsl</div>				<div class="xt-section" id="xt-xml-section">xml</div>				<div class="xt-section" id="xt-callstack-section">callstack</div>			</div>		</div>
+		
 		<script type="text/javascript">
 		 	xsl_tracer.init({
 		 		template_path: './test/xsl/',
@@ -24,7 +26,7 @@
 		 	});
 			
 			xsl_tracer.addEvent(EVT_COMPLETE, function(){
-				document.getElementById('output').appendChild(
+				document.getElementById('xt-content').appendChild(
 					renderer.renderXml(resource.getResource('result', 0))
 				);
 			});
