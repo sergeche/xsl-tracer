@@ -9,7 +9,23 @@
 	var resources = {},
 		/** How many files is currently loading or in load queue */
 		files_loading = 0,
-		res_id = 0;
+		res_id = 0,
+		timer;
+		
+	/**
+	 * Reserves resource slot in resource collection in order to preserve load 
+	 * queue indexes
+	 * @param {String} dict_name Dictionary name where to reserve slot
+	 * @return {Number}
+	 */
+	function reserveResourceSlot(dict_name) {
+		if (!(dict_name in resources)) {
+			resources[dict_name] = [];
+		}
+		
+		resources[dict_name].push(0);
+		return resources[dict_name].length - 1;
+	}
 		
 	/**
 	 * Add loaded resource to collection
@@ -19,7 +35,7 @@
 	 * If this argument is ommited, the resource name will be generatied 
 	 * automatically.
 	 */
-	function addResource(dict_name, data, res_name) {
+	function addResource(dict_name, data, res_name, slot) {
 		if (typeof res_name == 'undefined')
 			res_name = 'obj' + (++res_id);
 			
@@ -27,18 +43,45 @@
 			resources[dict_name] = [];
 		}
 		
-		resources[dict_name].push({
-			name: name,
+		var r = {
+			name: res_name,
 			data: data
-		});
+		};
+		
+		if (typeof slot != 'undefined')
+			resources[dict_name][slot] = r;
+		else
+			resources[dict_name].push(r);
 	}
 	
 	/**
 	 * Common file load callback function
 	 */
 	function loadCallback() {
-		if (--files_loading < 1)
-			xsl_tracer.dispatchEvent(EVT_LOAD_COMPLETE);
+		if (--files_loading < 1) {
+			if (timer)
+				clearTimeout(timer);
+				
+			timer = setTimeout(function() {
+				xsl_tracer.dispatchEvent(EVT_LOAD_COMPLETE);
+			}, 100);
+		}
+	}
+	
+	function getResource(dict_name, res_name) {
+		if (!isNaN( parseInt(res_name) )) {
+			// asking for resource by its collection index
+			return resources[dict_name][parseInt(res_name)] || null;
+		} else {
+			// asking for resource by its name
+			var r = resources[dict_name];
+			for (var i = 0, il = r.length; i < il; i++) {
+				if (r[i].name == res_name)
+					return r[i];
+			}
+		}
+		
+		return null;
 	}
 	
 	return {
@@ -52,13 +95,13 @@
 		 * @parama {Function} [callback] 
 		 */
 		load: function(url, dict_name, callback) {
-			console.log('get', url);
 			if (typeof url != 'string') {
 				// passing already loaded resource
 				addResource(dict_name, url);
 				if (callback)
 					callback(data, url);
 			} else {
+				var slot = reserveResourceSlot(dict_name);
 				++files_loading;
 				xsl_tracer.dispatchEvent(EVT_LOAD_FILE_START, {url: url});
 				
@@ -77,7 +120,7 @@
 					},
 		
 					success : function(data) {
-						addResource(dict_name, data, url);
+						addResource(dict_name, data, url, slot);
 						xsl_tracer.dispatchEvent(EVT_LOAD_FILE_COMPLETE, {url: url});
 						if (callback)
 							callback(data, url);
@@ -101,21 +144,21 @@
 			if (typeof res_name == 'undefined') {
 				return resources[dict_name];
 			} else {
-				if (!isNaN( parseInt(res_name) )) {
-					// asking for resource by its collection index
-					var r = resources[dict_name][parseInt(res_name)];
-					return r ? r.data : null;
-				} else {
-					// asking for resource by its name
-					var r = resources[dict_name];
-					for (var i = 0, il = r.length; i < il; i++) {
-						if (r[i].name == res_name)
-							return r[i].data;
-					}
-				}
+				var res = getResource(dict_name, res_name);
+				return res ? res.data : null;
 			}
-			
-			return null;
+		},
+		
+		/**
+		 * Returns single resource's name/url
+		 * @param {Stirng} dict_name Resource dictionary
+		 * @param {String|Number} res_name Resource name/url or index
+		 * @return {String|null}
+		 */
+		getResourceName: function(dict_name, res_name) {
+			var res = getResource(dict_name, res_name);
+			console.log(res);
+			return res ? res.name : null;
 		},
 		
 		/**
