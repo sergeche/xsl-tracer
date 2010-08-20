@@ -157,7 +157,6 @@
 		 */
 		getResourceName: function(dict_name, res_name) {
 			var res = getResource(dict_name, res_name);
-			console.log(res);
 			return res ? res.name : null;
 		},
 		

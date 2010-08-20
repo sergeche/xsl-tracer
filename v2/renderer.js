@@ -22,13 +22,15 @@
 	 * @return {String}
 	 */
 	function stylize(node) {
-		switch (node.nodeType) {
-			case 1: // element
-				return stylizeElement(node);
-			case 3: // text node
-				return stylizeTextNode(node);
-			case 9: // document
-				return stylizeElement(node.documentElement);
+		if (node) {
+			switch (node.nodeType) {
+				case 1: // element
+					return stylizeElement(node);
+				case 3: // text node
+					return stylizeTextNode(node);
+				case 9: // document
+					return stylizeElement(node.documentElement);
+			}
 		}
 		
 		return '';
@@ -56,7 +58,10 @@
 		if (attrs.length)
 			result.push(' ' + attrs.join(' '));
 			
-		if (!node.childNodes.length && node.nodeName in close_self) {
+		var name = node.nodeName.toLowerCase();
+			
+//		if (!node.childNodes.length && (name in close_self || name.indexOf('xsl:') === 0)) {
+		if (!node.childNodes.length) {
 			result.push(' /&gt;</span></span>');
 		} else {
 			result.push('&gt;</span>');
@@ -88,6 +93,10 @@
 		 */
 		renderXml: function(elem) {
 			var div = document.createElement('div');
+			if (!elem)
+				return div;
+			
+			
 			div.innerHTML = stylize(elem);
 			if (elem.nodeType == 9)
 				elem = elem.firstChild;

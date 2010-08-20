@@ -138,8 +138,6 @@
 	 * Basically, it transforms all XML/XSL documents into a DOM tree
 	 */
 	function processDocuments() {
-		console.log('loading complete');
-		
 		// don't do anything if we have errors
 		if (has_errors)
 			return;
@@ -232,7 +230,12 @@
 	function findTemplate(elem){
 		if (!elem) return null;
 		var meta = elem.meta;
-		return searchTagByLineCol(resource.getResource('xsl', parseInt(meta.m, 10)), meta.l, meta.c);
+		var res = resource.getResource('xsl', parseInt(meta.m, 10));
+		var result = searchTagByLineCol(res, meta.l, meta.c);
+		if (!result)
+			console.error('resource chain broken');
+		
+		return result;
 	}
 	
 	/**
@@ -241,11 +244,25 @@
 	 * @return {Element}
 	 */
 	function findSource(template_node){
-		if (!template_node || !template_node.src || !template_node.src.x) 
+		if (!template_node)
+			return;
+			
+		// search for src element
+		var src,
+			el = template_node;
+		do {
+			if (el.src) {
+				src = el.src;
+				break;
+			}
+		} while(el = el.parent);
+		
+		
+		if (!src || !src.x) 
 			return null;
 		
-		var source_doc = resource.getResource('xml', template_node.src.f === 'SOURCE' ? 0 : template_node.src.f);
-		return  utils.xpathFind(template_node.src.x, source_doc);
+		var source_doc = resource.getResource('xml', src.f === 'SOURCE' ? 0 : parseInt(src.f, 10) + 1);
+		return  utils.xpathFind(src.x, source_doc);
 	}
 	
 	/**

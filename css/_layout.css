@@ -75,6 +75,7 @@ body {
 	-webkit-background-clip: padding;
 	-webkit-background-origin: padding;
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A2B1CF), to(#788AB1));
+	background-color:#A2B1CF;
 	border-top: 1px solid #91A0C0;
 	padding: 0 8px 1px 15px;
 	white-space: nowrap;
@@ -105,6 +106,7 @@ body {
 	-webkit-background-clip: padding;
 	-webkit-background-origin: padding;
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#F3F3F3), color-stop(0.05, #F3F3F3), color-stop(0.05, #E6E6E6), to(#D1D1D1));
+	background-color:#D1D1D1;
 	border-bottom: 1px solid #BDBDBD;
 	border-top: 1px solid #BDBDBD;
 	color: #6E6E6E;

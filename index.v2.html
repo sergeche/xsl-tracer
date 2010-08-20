@@ -12,22 +12,24 @@
 		<script type="text/javascript" src="./v2/resource.js"></script>
 		<script type="text/javascript" src="./v2/utils.js"></script>
 		<script type="text/javascript" src="./v2/renderer.js"></script>
+		<script type="text/javascript" src="./v2/ui.js"></script>
 	</head>
 	<body>
 		<div id="xt-page">			<div id="xt-top-panel">Top panel</div>			<div id="xt-page-body">				<div id="xt-content"></div>			</div>			<div id="xt-trace-info">				<div class="xt-panel-header">XSL trace panel</div>
 				<div class="xt-section" id="xt-xsl-section">
 					<h2>
-						<span class="xt-subtitle">../include/some/templates.xsl:134</span>
+						<span class="xt-subtitle"></span>
 						<span class="xt-title">XSL</span>
 					</h2>
-					<div class="xt-xpath">/xsl:stylesheet/xsl:template[3]</div>
+					<div class="xt-xpath"></div>
 					<div class="xt-section-content"></div>
 				</div>				<div class="xt-section" id="xt-xml-section">
 					<h2>
-						<span class="xt-subtitle">SOURCE</span>
+						<span class="xt-subtitle"></span>
 						<span class="xt-title">Context XML</span>
 					</h2>
-					<div class="xt-xpath">/xsl:stylesheet/xsl:template[3]</div>
+					<div class="xt-xpath"></div>
+					<div class="xt-section-content"></div>
 				</div>				<div class="xt-section" id="xt-callstack-section">
 					<h2>
 						<span class="xt-title">Call stack</span>
@@ -48,19 +50,6 @@
 		 		trace_url: './test/out/simple.xhtml.json', 
 		 		result_url: './test/out/simple.xhtml'
 		 	});
-			
-			xsl_tracer.addEvent(EVT_COMPLETE, function(){
-				document.getElementById('xt-content').appendChild(
-					renderer.renderXml(resource.getResource('result', 0))
-				);
-				
-				
-				var doc = resource.getResource('result', 0);
-				
-				document.querySelector('#xt-xsl-section .xt-section-content').appendChild(
-					renderer.renderXml(doc.documentElement.getElementsByTagName('li')[0])
-				);
-			});
 		</script>
 	</body>
 </html>
