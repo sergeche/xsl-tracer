@@ -50,8 +50,13 @@
 		// test if current node should be displayed on one line
 		var is_one_liner = node.childNodes.length == 1 && node.firstChild.nodeType == 3 && node.firstChild.nodeValue.length < 100;
 		
-		var result = [];
-		result.push('<span class="xt-clr-tag' + (is_one_liner ? ' xt-clr-one-line' : '') + '">');
+		var result = [],
+			add_class = '';
+			
+		if (is_one_liner || !node.childNodes.length)
+			add_class += ' xt-clr-one-line'
+			
+		result.push('<span class="xt-clr-tag' + add_class + '">');
 		result.push('<span class="xt-clr-tag-switcher"></span>');
 		result.push('<span class="xt-clr-tag-open">&lt;');
 		result.push('<span class="xt-clr-tag-name">' + node.nodeName +'</span>');

@@ -378,6 +378,8 @@
 		 */
 		setPathResolver: function(fn) {
 			resolvePath = fn;
-		}
+		},
+		
+		searchTagByLineCol: searchTagByLineCol
 	}
 })();

@@ -51,4 +51,20 @@ var EVT_LOAD_START = 'onloadstart',
 	/**
 	 * XSL tracer is completely initiated, you can start working now.
 	 */
-	EVT_COMPLETE = 'oncomplete';
+	EVT_COMPLETE = 'oncomplete',
+	
+	/** 
+	 * User wants to trace element (e.g. clicked on element of result document).
+	 * The <code>data</code> event property contains tracing object 
+	 */
+	EVT_TRACE = 'ontrace',
+	
+	/**
+	 * Switch document in main content pane<br><br>
+	 * Event data:<br>
+	 * <code>type</code> : String – Document type ('xml', 'xsl', etc.)<br>
+	 * <code>name</code> : String – Document name or index<br>
+	 * <code>hl</code> : Element|String – Highlight specified element when 
+	 * document is rendered. Could be element or line-column pair
+	 */
+	EVT_SWITCH_DOCUMENT = 'onswitchdoc';

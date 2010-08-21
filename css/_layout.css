@@ -20,7 +20,20 @@ body {
 	padding:0 15px;
 	line-height:3em;
 	color:#fff;
-	background:#000;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#474747), to(#000));
+	background-color:#000;
+}
+
+#xt-top-panel:after {
+	position:absolute;
+	width:100%;
+	height:1px;
+	bottom:1px;
+	left:0;
+	background:#444;
+	overflow:hidden;
+	text-indent:-2em;
+	content:'.';
 }
 
 #xt-page-body {
@@ -34,8 +47,13 @@ body {
 
 #xt-content {
 	padding:5px;
-	font-size:1.1em;
+	font-size:12px;
 	line-height:1.4;
+}
+
+#xt-content .xt-clr-tag-open, 
+#xt-content .xt-clr-tag-close {
+	cursor:pointer;
 }
 
 #xt-trace-info {
@@ -137,19 +155,34 @@ body {
 }
 
 .xt-callstack > li {
-	margin-bottom:1em;
-	padding-top:0.5em;
+	padding:0.5em 15px;
 	font-size:11px;
+	clear:left;
 }
 
-.xt-callstack-title {
-	padding:0.3em 15px;
-	font-style:italic;
+.xt-callstack > li:nth-child(even) {
+	background:#eef5ff;
+}
+
+.xt-callstack .xt-file-link {
+	font-size:10px;
+	float:right;
+	overflow:hidden;
+	white-space:nowrap;
+	text-overflow:ellipsis;
+	max-width:55%;
+	margin-left:10px;
+	color:#999;
 }
 
 .xt-section-content {
 	padding:0.5em 0;
 	font-size:11px;
+}
+
+.xt-file-link {
+	text-decoration:underline;
+	cursor:pointer;
 }
 
 #xt-callstack-section {

@@ -12,20 +12,27 @@
 		<script type="text/javascript" src="./v2/resource.js"></script>
 		<script type="text/javascript" src="./v2/utils.js"></script>
 		<script type="text/javascript" src="./v2/renderer.js"></script>
+		<script type="text/javascript" src="./v2/sections.js"></script>
+		<script type="text/javascript" src="./v2/top-panel.js"></script>
 		<script type="text/javascript" src="./v2/ui.js"></script>
 	</head>
 	<body>
-		<div id="xt-page">			<div id="xt-top-panel">Top panel</div>			<div id="xt-page-body">				<div id="xt-content"></div>			</div>			<div id="xt-trace-info">				<div class="xt-panel-header">XSL trace panel</div>
+		<div id="xt-page">			<div id="xt-top-panel">
+				<div class="xt-view-file">
+					<label for="file">View file: </label>
+					<select name="file" id="fld-xt-file"></select>
+				</div>
+			</div>			<div id="xt-page-body">				<div id="xt-content"></div>			</div>			<div id="xt-trace-info">				<div class="xt-panel-header">XSL trace panel</div>
 				<div class="xt-section" id="xt-xsl-section">
 					<h2>
-						<span class="xt-subtitle"></span>
+						<span class="xt-subtitle xt-file-link"></span>
 						<span class="xt-title">XSL</span>
 					</h2>
 					<div class="xt-xpath"></div>
 					<div class="xt-section-content"></div>
 				</div>				<div class="xt-section" id="xt-xml-section">
 					<h2>
-						<span class="xt-subtitle"></span>
+						<span class="xt-subtitle xt-file-link"></span>
 						<span class="xt-title">Context XML</span>
 					</h2>
 					<div class="xt-xpath"></div>
