@@ -147,6 +147,7 @@
 			data = utils.toXML(data);
 			
 			if (!data) {
+				has_errors = true;
 				dispatcher.dispatchEvent(EVT_ERROR, {
 					error_name: 'xml_parsing_error',
 					error_data: data
@@ -291,6 +292,27 @@
 		return doc;
 	}
 	
+	/**
+	 * Add event listener
+	 * @param {String|Array} name Event name(s)
+	 * @param {Function} fn Event listener
+	 * @param {Boolean} [only_once] Event listener should be called only once
+	 */
+	function addEvent(name, fn, only_once) {
+		if (typeof name == 'string')
+			name = name.split(' ');
+			
+		for (var i = 0, il = name.length; i < il; i++) {
+			dispatcher.addEventListener(name[i], fn, only_once);
+		}
+	}
+	
+	
+	addEvent(EVT_LOAD_COMPLETE, processDocuments);
+	addEvent([EVT_ERROR, EVT_LOAD_FILE_ERROR], function() {
+		has_errors = true;
+	});
+	
 	return {
 		/**
 		 * Init XSL tracer
@@ -301,12 +323,7 @@
 		 */
 		init: function(options) {
 			templates_root = options.template_path;
-			this.addEvent(EVT_LOAD_COMPLETE, processDocuments);
 			this.dispatchEvent(EVT_INIT);
-			
-			this.addEvent([EVT_ERROR, EVT_LOAD_FILE_ERROR], function() {
-				has_errors = true;
-			});
 			
 			// start document loading
 			
@@ -341,14 +358,7 @@
 		 * @param {Function} fn Event listener
 		 * @param {Boolean} [only_once] Event listener should be called only once
 		 */
-		addEvent: function(name, fn, only_once) {
-			if (typeof name == 'string')
-				name = name.split(' ');
-				
-			utils.each(name, function(i, n) {
-				dispatcher.addEventListener(n, fn, only_once);
-			});
-		},
+		addEvent: addEvent,
 		
 		/**
 		 * Remove event listener

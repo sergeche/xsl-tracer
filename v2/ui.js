@@ -5,8 +5,9 @@
  * 
  * @include "xsl_tracer.js"
  * @include "renderer.js"
- */$(function(){
-	var file_contents = $('#xt-content'),
+ */(function(){
+	/** @type {jQuery} */
+	var file_contents,
 		/** @type {jQuery} Currently selected element */
 		selected_elem;
 	
@@ -52,9 +53,15 @@
 			xsl_tracer.dispatchEvent(EVT_SWITCH_DOCUMENT, file_info);
 		}
 	});
+	
+	xsl_tracer.addEvent(EVT_INIT, function(args) {
+		file_contents = $('#xt-content');
+		$(document.body).addClass('loading');
+	});
 		
 	xsl_tracer.addEvent(EVT_COMPLETE, function(){
 		// render full result document when tracer is done
+		$(document.body).removeClass('loading');
 		xsl_tracer.dispatchEvent(EVT_SWITCH_DOCUMENT, {type: 'result', name: 0});
 	});
 	
@@ -98,4 +105,4 @@
 			}
 		}
 	});
-});
+})();

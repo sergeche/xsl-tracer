@@ -223,3 +223,7 @@ body {
 	margin-right:1px;
 	width:34%;
 }
+
+.loading #xt-page {
+	visibility:hidden;
+}
