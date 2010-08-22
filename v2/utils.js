@@ -339,6 +339,28 @@ var utils = function(){
 				if (fn(i, ar[i]) === false)
 					break;
 			}
+		},
+		
+		/**
+		 * Create small flash that alows user to copy text into buffer by 
+		 * clicking on this movie
+		 * @param {String} text Text to copy
+		 * @return {Element} Flash object redy to be inserted into document
+		 */
+		createClippy: function(text) {
+			var div = document.createElement('div');
+			text = encodeURIComponent(text);
+			div.innerHTML = '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="14" height="14">' +
+			    '<param name="movie" value="./i/clippy.swf"/>' +
+			    '<param name="allowScriptAccess" value="always" />'+
+			    '<param name="quality" value="high" />' +
+			    '<param name="scale" value="noscale" />' +
+			    '<param name="FlashVars" value="text=' + text + '" />' +
+			    '<param name="bgcolor" value="#ffffff" />' +
+			    '<embed src="./i/clippy.swf" width="14" height="14" scale="noscale" quality="high" allowScriptAccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" FlashVars="text=' + text + '" bgcolor="#ffffff" />' +
+			'</object>';
+			
+			return div.firstChild;
 		}
 	};
 }();

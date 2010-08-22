@@ -31,7 +31,9 @@
 				hl: trace_obj.template
 			});
 				
-		section_xsl.find('.xt-xpath').text(utils.createXPath(trace_obj.template));
+		var xpath = utils.createXPath(trace_obj.template);
+		section_xsl.find('.xt-xpath').text(xpath);
+		section_xsl.find('.xt-copy-buf').empty().append(utils.createClippy(xpath));
 		
 		section_xsl.find('.xt-section-content').empty().append(
 			renderer.renderXml(trace_obj.template)
@@ -69,6 +71,7 @@
 				.text(file_name);
 				
 			section_xml.find('.xt-xpath').text(src.x);
+			section_xml.find('.xt-copy-buf').empty().append(utils.createClippy(src.x));
 			section_xml.find('.xt-section-content').empty().append(
 				renderer.renderXml(trace_obj.source)
 			);
