@@ -86,20 +86,20 @@ body {
 	position:absolute;
 	top:2.5em;
 	bottom:0;
-	overflow:auto;
+	/* overflow:auto; */
 	background:#fff;
 }
 
 .xt-section h2 {
-	-webkit-background-clip: padding;
-	-webkit-background-origin: padding;
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A2B1CF), to(#788AB1));
 	background-color:#A2B1CF;
 	border-top: 1px solid #91A0C0;
 	padding: 0 8px 1px 15px;
 	white-space: nowrap;
-	font-size:11px;
+	font-size:12px;
 	line-height:18px;
+	height:18px;
+	overflow:hidden;
 }
 
 .xt-section h2 .xt-title {
@@ -167,6 +167,8 @@ body {
 
 .xt-callstack {
 	list-style:none;
+	background:#fff;
+	border-bottom:1px solid #bdbdbd;
 }
 
 .xt-callstack > li {
@@ -193,6 +195,11 @@ body {
 .xt-section-content {
 	padding:0.5em 0;
 	font-size:11px;
+	position:absolute;
+	top:40px;
+	bottom:0;
+	width:100%;
+	overflow:auto;
 }
 
 .xt-file-link {
@@ -202,6 +209,7 @@ body {
 
 #xt-callstack-section {
 	right:0;
+	background:#f5f5f5;
 }
 
 #xt-xml-section {
