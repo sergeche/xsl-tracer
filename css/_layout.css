@@ -22,6 +22,7 @@ body {
 	line-height:3em;
 	color:#fff;
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#474747), to(#000));
+	background-image: -moz-linear-gradient(top, #474747, #000);
 	background-color:#000;
 }
 
@@ -68,7 +69,9 @@ body {
 .xt-panel-header {
 	border-top:1px solid #9d9d9d;
 	border-bottom:1px solid #8c8c8c;
-	background:url(../i/panel-header-bg.png) #c3c3c3 repeat-x;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#d4d4d4), to(#bbb));
+	background-image: -moz-linear-gradient(top, #d4d4d4, #bbb);
+	background-color:#c3c3c3;
 	padding:0 15px;
 	line-height:2.5em;
 	height:2.5em;
@@ -93,6 +96,7 @@ body {
 
 .xt-section h2 {
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A2B1CF), to(#788AB1));
+	background-image: -moz-linear-gradient(top, #A2B1CF, #788AB1);
 	background-color:#A2B1CF;
 	border-top: 1px solid #91A0C0;
 	padding: 0 8px 1px 15px;
@@ -126,6 +130,7 @@ body {
 	-webkit-background-clip: padding;
 	-webkit-background-origin: padding;
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#F3F3F3), color-stop(0.05, #F3F3F3), color-stop(0.05, #E6E6E6), to(#D1D1D1));
+	background-image: -moz-linear-gradient(top, #F3F3F3, #D1D1D1);
 	background-color:#D1D1D1;
 	border-bottom: 1px solid #BDBDBD;
 	border-top: 1px solid #BDBDBD;
@@ -149,9 +154,9 @@ body {
 .xt-copy-buf {
 	position:absolute;
 	margin-top:2px;
+	margin-left:2px;
 }
 
-/* .xt-xpath, */
 .xt-callstack-res {
 	padding:2px 10px 2px 15px;
 	overflow:hidden;

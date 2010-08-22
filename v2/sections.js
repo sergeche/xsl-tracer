@@ -81,23 +81,6 @@
 	}
 	
 	/**
-	 * Escapes unsafe HTML characters
-	 * @param {String} str
-	 * @return {String}
-	 */
-	function escapeHTML(str) {
-		var charmap = {
-			'<': '&lt;',
-			'>': '&gt;',
-			'&': '&amp;'
-		};
-		
-		return str.replace(/[<>&]/g, function(s) {
-			return charmap[s] || s;
-		});
-	}
-	
-	/**
 	 * Creates string representation of XML tag from tracing node
 	 * @param {Object} trace_node
 	 * @return {String}
@@ -107,7 +90,7 @@
 		if (trace_node.attrs) {
 			var a = trace_node.attrs;
 			for (var p in a) if (a.hasOwnProperty(p)) {
-				result += ' ' + p + '="' + escapeHTML(a[p]) + '"';
+				result += ' ' + p + '="' + utils.escapeHTML(a[p]) + '"';
 			}
 		}
 		

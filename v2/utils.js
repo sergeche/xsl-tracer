@@ -387,6 +387,23 @@ var utils = function(){
 			return text.replace(/&(lt|gt|amp|apos|quot);/g, function(str) {
 				return chars[str];
 			});
+		},
+		
+		/**
+		 * Escapes unsafe HTML characters
+		 * @param {String} str
+		 * @return {String}
+		 */
+		escapeHTML: function(str) {
+			var charmap = {
+				'<': '&lt;',
+				'>': '&gt;',
+				'&': '&amp;'
+			};
+			
+			return str.replace(/[<>&]/g, function(s) {
+				return charmap[s] || s;
+			});
 		}
 
 	};

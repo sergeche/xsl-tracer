@@ -43,7 +43,7 @@
 	function cleanupEntities(text) {
 		return text
 			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i, '')
-			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+\[((?:.|[\r\n])+?)\]\s*>/i, '')
+			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+[^\[]*\[((?:.|[\r\n])+?)\]\s*>/i, '')
 			.replace(/&(?!#|x\d)/gi, '&amp;');
 	}
 	
@@ -158,9 +158,15 @@
 						error_elem = error_doc && error_doc.getElementsByTagName('parsererror')[0];
 						
 					if (error_elem) {
-						utils.each(error_elem.getElementsByTagName('div'), function(i, n) {
-							error_data += n.outerHTML;
-						});
+						var divs = error_elem.getElementsByTagName('div');
+						if (divs.length) {
+							// WebKit error style
+							utils.each(error_elem.getElementsByTagName('div'), function(i, n) {
+								error_data += n.outerHTML;
+							});
+						} else {
+							error_data = utils.escapeHTML(error_elem.textContent || '') || error_elem.innerHTML;
+						}
 					}
 				}
 				
