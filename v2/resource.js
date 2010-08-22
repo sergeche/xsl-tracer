@@ -97,9 +97,18 @@
 		load: function(url, dict_name, callback) {
 			if (typeof url != 'string') {
 				// passing already loaded resource
-				addResource(dict_name, url);
+				var data = url;
+				if (url instanceof Element) {
+					if (url.childNodes.length == 1 && url.firstChild.nodeType == 3) {
+						data = utils.unescapeHTML(url.innerHTML);
+					} else {
+						data = utils.trim(url.innerHTML);
+					}
+				}
+				
+				addResource(dict_name, data);
 				if (callback)
-					callback(data, url);
+					callback(data);
 			} else {
 				var slot = reserveResourceSlot(dict_name);
 				++files_loading;

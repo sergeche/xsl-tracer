@@ -362,6 +362,32 @@ var utils = function(){
 			'</object>';
 			
 			return div.firstChild;
+		},
+		
+		/**
+		 * Removes trailing whitespace
+		 * @param {String} text
+		 * @return {String}
+		 */
+		trim: function(text) {
+			return (text || '').replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, '');
+		},
+		
+		unescapeHTML: function(text) {
+			var chars = {
+				'&lt;': '<',
+				'&gt;': '>',
+				'&amp;': '&',
+				'&quot;': '"',
+				'&apos;': '\''
+			};
+			
+			text = this.trim(text);
+			
+			return text.replace(/&(lt|gt|amp|apos|quot);/g, function(str) {
+				return chars[str];
+			});
 		}
+
 	};
 }();

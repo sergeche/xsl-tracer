@@ -228,3 +228,7 @@ body {
 .inited #xt-page {
 	visibility:visible;
 }
+
+.xt-document {
+	display:none;
+}

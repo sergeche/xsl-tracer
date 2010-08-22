@@ -352,33 +352,37 @@
 			
 			// we should load source document first in order to maintain
 			// correct document's index positions
-			resource.load(options.source_url, 'xml', function(data, url) {
+			resource.load(options.source_url, 'xml', function(data) {
 				// ..then load tracing data
 				resource.load(options.trace_url, 'trace', function(data) {
 					if (typeof data == 'string') {
 						try {
 							data = JSON.parse(data);
-							// save trace data
-							resource.setResource('trace', 0, data);
-							
-							// ...and now load all the rest external references
-							utils.each(data['xsl'], function(i, n) {
-								resource.load(resolvePath(n, 'xsl'), 'xsl');
-							});
-							
-							utils.each(data['xml'], function(i, n) {
-								resource.load(resolvePath(n, 'xml'), 'xml');
-							});
 						} catch (e) {
+							data = null;
 							xsl_tracer.dispatchEvent(EVT_ERROR, {
 								url: options.trace_url,
 								error_code: 0,
 								error_data: e.toString()
 							});
 						}
-						
-						resource.load(options.result_url, 'result');
 					}
+					
+					if (data) {
+						// save trace data
+						resource.setResource('trace', 0, data);
+						
+						// ...and now load all the rest external references
+						utils.each(data['xsl'], function(i, n) {
+							resource.load(resolvePath(n, 'xsl'), 'xsl');
+						});
+						
+						utils.each(data['xml'], function(i, n) {
+							resource.load(resolvePath(n, 'xml'), 'xml');
+						});
+					}
+					
+					resource.load(options.result_url, 'result');
 				});
 			});
 		},
