@@ -9,7 +9,12 @@
  */$(function(){
 	var section_xsl = $('#xt-xsl-section'),
 		section_xml = $('#xt-xml-section'),
-		section_callstack = $('#xt-callstack-section');
+		section_callstack = $('#xt-callstack-section'),
+		call_tags = {
+			'xsl:apply-templates': 1,
+			'xsl:call-template': 1,
+			'xsl:apply-imports': 1
+		};
 	
 	/**
 	 * Updates XSL section contents based on tracing object
@@ -115,7 +120,7 @@
 		var callstack = [],
 			el = trace_obj.trace;
 		do {
-			if (el.tag == 'xsl:apply-templates' || el.tag == 'xsl:call-template')
+			if (el.tag in call_tags)
 				callstack.push(el);
 		} while (el = el.parent);
 		
