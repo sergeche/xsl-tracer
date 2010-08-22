@@ -113,7 +113,7 @@
 						xsl_tracer.dispatchEvent(EVT_LOAD_FILE_ERROR, {
 							url: url,
 							error_code: error_thrown,
-							error_status: text_status
+							error_data: text_status
 						});
 						
 						loadCallback();

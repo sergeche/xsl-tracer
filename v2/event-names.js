@@ -30,7 +30,7 @@ var EVT_LOAD_START = 'onloadstart',
 	 * contains hash with the following properties:<br><br>
 	 * <b>url</b> : String — URL of loaded file<br>
 	 * <b>error_code</b> : Number — Code error<br>
-	 * <b>error_status</b> : String — Error description
+	 * <b>error_data</b> : String — Error description
 	 */
 	EVT_LOAD_FILE_ERROR = 'onloadfileerror',
 	

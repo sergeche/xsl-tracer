@@ -69,24 +69,25 @@ var utils = function(){
 		 */
 		toXML : function(text) {
 			var xml = null;
-			try {
-				if (window.ActiveXObject) { // IE
-					xml = new ActiveXObject('Microsoft.XMLDOM');
-					xml.async = false;
-					xml.loadXML(text);
-				} else if (window.DOMParser) { // Все остальные
-					var xml = (new DOMParser()).parseFromString(text, 'text/xml');
-				}
-				
-				if (!xml || !xml.documentElement
-						|| xml.documentElement.nodeName == 'parsererror'
-						|| xml.getElementsByTagName('parsererror').length) {
-					console.log(xml);
-					return false;
-				}
-			} catch (error) {
-				return false;
+			if (window.ActiveXObject) { // IE
+				xml = new ActiveXObject('Microsoft.XMLDOM');
+				xml.async = false;
+				xml.loadXML(text);
+			} else if (window.DOMParser) { // Все остальные
+				var xml = (new DOMParser()).parseFromString(text, 'text/xml');
 			}
+			
+			if (!xml || !xml.documentElement
+					|| xml.documentElement.nodeName == 'parsererror'
+					|| xml.getElementsByTagName('parsererror').length) {
+						
+				
+				throw new XmlParsingError(xml);
+			}
+//			try {
+//			} catch (error) {
+//				return false;
+//			}
 			
 			return xml;
 		},

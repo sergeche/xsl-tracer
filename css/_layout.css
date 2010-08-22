@@ -11,6 +11,7 @@ body {
 
 #xt-page {
 	font-size:1.2em;
+	visibility:hidden;
 }
 
 #xt-top-panel {
@@ -224,6 +225,6 @@ body {
 	width:34%;
 }
 
-.loading #xt-page {
-	visibility:hidden;
+.inited #xt-page {
+	visibility:visible;
 }

@@ -8,6 +8,7 @@
 		<script type="text/javascript" src="./v2/lib/json2.js"></script>
 		<script type="text/javascript" src="./v2/lib/EventDispatcher.js"></script>
 		<script type="text/javascript" src="./v2/event-names.js"></script>
+		<script type="text/javascript" src="./v2/errors.js"></script>
 		<script type="text/javascript" src="./v2/xsl_tracer.js"></script>
 		<script type="text/javascript" src="./v2/resource.js"></script>
 		<script type="text/javascript" src="./v2/utils.js"></script>
@@ -22,6 +23,14 @@
 		<div id="xt-preloader">
 			<h3>Loading...</h3>
 		</div>
+		<!-- 
+			Uncomment the #xt-global-error block to show server error and
+			cancel XSL tracer initialization
+		 -->
+		<!-- 
+		<div id="xt-global-error">			<h2>Error</h2>			<div id="xt-global-error-content">				<p>The XSL traces cannot be initialized because of the following server error:</p>				<div class="xt-error">Server error here</div>			</div>		</div> 
+		-->
+		
 		<div id="xt-page">			<div id="xt-top-panel">
 				<div class="xt-view-file">
 					<label for="file">View file: </label>

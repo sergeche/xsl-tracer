@@ -42,13 +42,13 @@
 		});
 	});
 	
-	xsl_tracer.addEvent(EVT_LOAD_FILE_ERROR, function(/* Event */ evt) {
+	xsl_tracer.addEvent([EVT_LOAD_FILE_ERROR, EVT_ERROR], function(/* Event */ evt) {
 		var file_name = evt.data.url;
 		file_list.find('li').each(function(i, n) {
 			n = $(n);
 			if (n.text() == file_name) {
 				n.addClass('error').append(
-					$('<div class="xt-error"></div>').text(processError(evt.data.error_status))
+					$('<div class="xt-error"></div>').html(processError(evt.data.error_data))
 				);
 				return false;
 			}
@@ -56,7 +56,7 @@
 	});
 	
 	$(function(){
-		$(preloader).delegate('li.error > .xt-file-name', 'click', function(/* Event */ evt) {
+		$('#xt-preloader').delegate('li.error > .xt-file-name', 'click', function(/* Event */ evt) {
 			$(this).next('.xt-error').toggle();
 		});
 	});

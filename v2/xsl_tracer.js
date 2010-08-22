@@ -7,6 +7,7 @@
  * @include "event-names.js"
  * @include "utils.js"
  * @include "resource.js"
+ * @include "errors.js"
  */var xsl_tracer = (function(){
 	/** 
 	 * Main event dispatcher. Most of tracer features and UI components are 
@@ -144,16 +145,32 @@
 		
 		var toXML = function(i, n) {
 			var data = cleanupEntities(n.data);
-			data = utils.toXML(data);
-			
-			if (!data) {
-				has_errors = true;
-				dispatcher.dispatchEvent(EVT_ERROR, {
-					error_name: 'xml_parsing_error',
-					error_data: data
-				});
-			} else {
+			try {
+				data = utils.toXML(data);
 				return n.data = data;
+			} catch (e) {
+				has_errors = true;
+				var error_data = '';
+				
+				if (e == 'XmlParsingError') {
+					/** @type {Document} */
+					var error_doc = e.doc,
+						error_elem = error_doc && error_doc.getElementsByTagName('parsererror')[0];
+						
+					if (error_elem) {
+						utils.each(error_elem.getElementsByTagName('div'), function(i, n) {
+							error_data += n.outerHTML;
+						});
+					}
+				}
+				
+				dispatcher.dispatchEvent(EVT_ERROR, {
+					url: n.name,
+					error_code: 'xml_parsing_error',
+					error_data: error_data
+				});
+				
+				return null;
 			}
 		};
 		
@@ -161,8 +178,10 @@
 		utils.each(resource.getResource('xsl'), function(i, n) {
 			n.data = utils.markTagPositions(n.data);
 			var data = toXML(i, n);
-			data.__lines = rememberElementLines(n.name, data);
-			n.data = cleanupDocument(data);
+			if (data) {
+				data.__lines = rememberElementLines(n.name, data);
+				n.data = cleanupDocument(data);
+			}
 		});
 		
 		// transform all XML documents
@@ -322,6 +341,10 @@
 		 * @param {String|Element} options.result_url Path or pointer to result data
 		 */
 		init: function(options) {
+			// don't do anything if there's a global error
+			if (document.getElementById('xt-global-error'))
+				return;
+			
 			templates_root = options.template_path;
 			this.dispatchEvent(EVT_INIT);
 			
@@ -333,21 +356,29 @@
 				// ..then load tracing data
 				resource.load(options.trace_url, 'trace', function(data) {
 					if (typeof data == 'string') {
-						data = JSON.parse(data);
-						// save trace data
-						resource.setResource('trace', 0, data);
-					}
+						try {
+							data = JSON.parse(data);
+							// save trace data
+							resource.setResource('trace', 0, data);
+							
+							// ...and now load all the rest external references
+							utils.each(data['xsl'], function(i, n) {
+								resource.load(resolvePath(n, 'xsl'), 'xsl');
+							});
+							
+							utils.each(data['xml'], function(i, n) {
+								resource.load(resolvePath(n, 'xml'), 'xml');
+							});
+						} catch (e) {
+							xsl_tracer.dispatchEvent(EVT_ERROR, {
+								url: options.trace_url,
+								error_code: 0,
+								error_data: e.toString()
+							});
+						}
 						
-					// ...and now load all the rest external references
-					utils.each(data['xsl'], function(i, n) {
-						resource.load(resolvePath(n, 'xsl'), 'xsl');
-					});
-					
-					utils.each(data['xml'], function(i, n) {
-						resource.load(resolvePath(n, 'xml'), 'xml');
-					});
-					
-					resource.load(options.result_url, 'result');
+						resource.load(options.result_url, 'result');
+					}
 				});
 			});
 		},

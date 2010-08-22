@@ -61,7 +61,9 @@
 		
 	xsl_tracer.addEvent(EVT_COMPLETE, function(){
 		// render full result document when tracer is done
-		$(document.body).removeClass('loading');
+		$(document.body)
+			.removeClass('loading')
+			.addClass('inited');
 		xsl_tracer.dispatchEvent(EVT_SWITCH_DOCUMENT, {type: 'result', name: 0});
 	});
 	
