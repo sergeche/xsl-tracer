@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="XSL Tracer" default="build_tracer">
+	<import file="webtasks.xml"/>
+	
+	<property name="output.dir" value="${basedir}/dist"/>
+	
+	<property name="js.dir" value="${output.dir}/js"/>
+	<property name="js-src.dir" value="${basedir}/v2"/>
+
+	<property name="css.dir" value="${output.dir}/css"/>
+	<property name="css-src.dir" value="${basedir}/css"/>
+
+	<target name="build_tracer" depends="webtasks.init, tracer.init, tracer.css, tracer.js">
+		<echo>Tracer building done.</echo>
+	</target>
+	
+	<target name="tracer.init">
+		<delete dir="${output.dir}" />
+		<mkdir dir="${output.dir}" />
+		<mkdir dir="${js.dir}" />
+		<mkdir dir="${css.dir}" />
+	</target>
+
+	<target name="tracer.js" depends="tracer.init">
+		<compile-js-lib tofile="${js.dir}/xsl_tracer.js">
+			<filelist dir="${js-src.dir}">
+				<file name="__intro.js" />
+				<file name="lib/EventDispatcher.js"/>
+				<file name="lib/json2.js"/>
+				<file name="event-names.js"/>
+				<file name="errors.js"/>
+				<file name="xsl_tracer.js"/>
+				<file name="resource.js"/>
+				<file name="utils.js"/>
+				<file name="renderer.js"/>
+				<file name="sections.js"/>
+				<file name="top-panel.js"/>
+				<file name="ui.js"/>
+				<file name="preloader.js"/>
+				<!-- <file name="bottom-panel.js"/> -->
+				<file name="__outro.js" />
+			</filelist>
+		</compile-js-lib>
+		
+		<compile-js-lib tofile="${js.dir}/json2.js">
+			<filelist dir="${js-src.dir}/lib">
+				<file name="json2.js"/>
+			</filelist>
+		</compile-js-lib>
+		
+		<copy file="${js-src.dir}/lib/jquery-1.4.2.min.js" todir="${js.dir}" />
+	</target>
+
+	<target name="tracer.css" depends="tracer.init">
+		<compress-css dir="${css-src.dir}" todir="${css.dir}"/>
+		<echo>CSS compression done.</echo>
+	</target>
+</project>
