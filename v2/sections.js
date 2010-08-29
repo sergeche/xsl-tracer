@@ -87,8 +87,6 @@
 			section_xml.find('.xt-section-content').empty().append(
 				renderer.renderXml(context_elem)
 			);
-		} else {
-			console.log('source not found');
 		}
 	}
 	
