@@ -151,6 +151,85 @@
 	}
 	
 	/**
+	 * @class
+	 */
+	function LRE(name, ref) {
+		this.name = name;
+		this.ref = ref;
+		this.children = [];
+		/** @type {LRE} */
+		this.previousSibling = null;
+		/** @type {LRE} */
+		this.nextSibling = null;
+		/** @type {LRE} */
+		this.parent = null;
+	}
+	
+	LRE.prototype = {
+		/**
+		 * @param {LRE} child
+		 */
+		addChild: function(child) {
+			child.previousSibling = null;
+			child.nextSibling = null;
+			
+			if (this.children.length) {
+				var lastChild = this.children[this.children.length - 1];
+				child.previousSibling = lastChild;
+				lastChild.nextSibling = child;
+			}
+			
+			this.children.push(child);
+			child.parent = this;
+		},
+		
+		getPath: function() {
+			var prefix;
+			if (!this.parent)
+				return "/";
+			else {
+				prefix = this.parent.getPath();
+				return (prefix == '/' ? '' : prefix) + 
+	            	"/" + this.name + "[" + this.getNumber() + "]";
+			}
+		},
+		
+		getNumber: function() {
+			var curName = this.name,
+				pos = 1,
+				prev = this;
+				
+			while (prev = prev.previousSibling) {
+				if (prev.name == curName)
+					pos++;
+			}
+			
+			return pos;
+		}
+	};
+	
+	function makeLreTree(trace, /* LRE */ lre_node) {
+		for (var i = 0, il = trace.children.length; i < il; i++) {
+			var item = trace.children[i],
+				el = lre_node;
+				
+			if (item.type == 'LRE') {
+				el = new LRE(item.name, item);
+				lre_node.addChild(el);
+			}
+			
+			makeLreTree(item, el);
+		}
+	}
+	
+	function updateXpath(/* LRE */ lre) {
+		lre.ref.xpath = lre.getPath();
+		for (var i = 0, il = lre.children.length; i < il; i++) {
+			updateXpath(lre.children[i]);
+		}
+	}
+	
+	/**
 	 * Processes tracing document
 	 */
 	function processTraceDocument() {
@@ -166,6 +245,12 @@
 				
 			walk(n.data);
 		});
+		
+		var trace_doc = resource.getResource('trace', 0),
+			lre_root = new LRE('', trace_doc);
+			
+		makeLreTree(trace_doc, lre_root);
+		updateXpath(lre_root);
 		
 		// find all LRE elements
 		xpath_lookup = {};
