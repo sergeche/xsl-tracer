@@ -140,6 +140,7 @@ body {
 	line-height:18px;
 	height:18px;
 	padding: 0px 15px;
+	padding-left:20px;
 	text-shadow: white 0px 1px 0px;
 	overflow:hidden;
 }
@@ -154,7 +155,7 @@ body {
 .xt-copy-buf {
 	position:absolute;
 	margin-top:2px;
-	margin-left:2px;
+	left:3px;
 }
 
 .xt-callstack-res {

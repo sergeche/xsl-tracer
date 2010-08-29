@@ -63,8 +63,8 @@
 		var src,
 			el = trace_obj.trace;
 		do {
-			if (el.ctx) {
-				src = el.ctx;
+			if (el.ctx || (el.src && el.type == 'LRE')) {
+				src = el.ctx || el.src;
 				break;
 			}
 		} while(el = el.parent);
@@ -87,6 +87,8 @@
 			section_xml.find('.xt-section-content').empty().append(
 				renderer.renderXml(context_elem)
 			);
+		} else {
+			console.log('source not found');
 		}
 	}
 	

@@ -23,9 +23,8 @@
 		
 		// XML group
 		group = $('<optgroup label="XML"></optgroup>');
-		group.append('<option value="xml-0">Source</option>');
 		$.each(trace_doc['xml'], function(i, n) {
-			group.append('<option value="xml-' + (i + 1) + '">' + n + '</option>');
+			group.append('<option value="xml-' + i + '">' + n + '</option>');
 		});
 		
 		file_list.append(group);
