@@ -17,8 +17,10 @@
 	var dispatcher = new EventDispatcher(),
 		/** @type {String} Path to XSL templates root folder */
 		templates_root,
-		/** List of RLE elements from tracing document */
-		trace_lre = [],
+		
+		/** List of xpath references for tracing elements */
+		xpath_lookup = {},
+		
 		/** Wether or not errors occured during tracer initialization */
 		has_errors = false;
 		
@@ -36,80 +38,24 @@
 	}
 	
 	/**
+	 * Removes all entity references from document
+	 * @param {String} text
+	 * @return {String}
+	 */
+	function removeEntityReferences(text) {
+		return text
+			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i, '')
+			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+[^\[]*\[((?:.|[\r\n])+?)\]\s*>/i, '');
+	}
+	
+	/**
 	 * Remove entity definitions and escape entity names so they don't
 	 * break XML parsing
 	 * @param {String} text
 	 */
 	function cleanupEntities(text) {
-		return text
-			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i, '')
-			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+[^\[]*\[((?:.|[\r\n])+?)\]\s*>/i, '')
+		return removeEntityReferences(text)
 			.replace(/&(?!#|x\d)/gi, '&amp;');
-	}
-	
-	/**
-	 * Relement all element's line and column positions for faster lookup
-	 * @param {String} name
-	 * @param {Document} doc
-	 * @return {Array} List of indexed tags 
-	 */
-	function rememberElementLines(name, doc) {
-		var result = [];
-		utils.each(doc.getElementsByTagName('*'), function(i, n) {
-			var lines = n.getAttribute('xsltrace-line').split('-'),
-				cols = n.getAttribute('xsltrace-column').split('-')
-				
-			result.push({
-				elem: n,
-				start_line: parseInt(lines[0], 10),
-				end_line: parseInt(lines[1] || lines[0], 10),
-				start_column: parseInt(cols[0], 10),
-				end_column: parseInt(cols[1] || cols[0], 10)
-			});
-		});
-		
-		result.sort(function(a, b) {
-			return a.start_line - b.start_line
-		});
-		
-		return result;
-	}
-	
-	/**
-	 * Removes extra data from XML document added by XSL tracer
-	 * @param {Document} doc
-	 * @return {Document}
-	 */
-	function cleanupDocument(doc) {
-		utils.each(doc.getElementsByTagName('*'), function(i, /* Element */ n) {
-			n.removeAttribute('xsltrace-line');
-			n.removeAttribute('xsltrace-column');
-		});
-		
-		return doc;
-	}
-	
-	/**
-	 * Search for element in XML file by its line and column
-	 * @param {Document} XML/XSL module
-	 * @param {Number} line Element's line
-	 * @param {Number} col Element's column
-	 * @return {Element}
-	 */
-	function searchTagByLineCol(doc, line, col) {
-		line = parseInt(line, 10);
-		col = parseInt(col, 10);
-		var result;
-		if (doc.__lines) {
-			$.each(doc.__lines, function(i, n) {
-				if (line >= n.start_line && line <= n.end_line && col >= n.start_column && col <= n.end_column) {
-					result = n.elem;
-					return false;
-				}
-			});
-		}
-		
-		return result;
 	}
 	
 	/**
@@ -181,18 +127,17 @@
 		};
 		
 		// transform all XSL documents
-		utils.each(resource.getResource('xsl'), function(i, n) {
-			n.data = utils.markTagPositions(n.data);
-			var data = toXML(i, n);
-			if (data) {
-				data.__lines = rememberElementLines(n.name, data);
-				n.data = cleanupDocument(data);
-			}
-		});
+		utils.each(resource.getResource('xsl'), toXML);
 		
 		// transform all XML documents
 		utils.each(resource.getResource('xml'), toXML);
-		utils.each(resource.getResource('result'), toXML);
+		utils.each(resource.getResource('result'), function(i, /* String */ n) {
+			// the result may be not well-formed XML document, so we 
+			// explicitly wrap content with root tag
+			n.data = removeEntityReferences(n.data);
+			n.data = '<xsl-tracer>' + n.data.replace(/<\?xml.+?\?>/g, '') + '</xsl-tracer>';
+			return toXML(i, n);
+		});
 		
 		processTraceDocument();
 		
@@ -200,13 +145,13 @@
 			// extend result document with tracing data
 			buildElementDependency(resource.getResource('result', 0));
 			
-			// tracer is ready
+			// TODO tracer is ready
 			dispatcher.dispatchEvent(EVT_COMPLETE);
 		}
 	}
 	
 	/**
-	 * Processes tracing documents
+	 * Processes tracing document
 	 */
 	function processTraceDocument() {
 		var walk = function(elem, parent) {
@@ -223,72 +168,11 @@
 		});
 		
 		// find all LRE elements
-		trace_lre = [];
+		xpath_lookup = {};
 		walkTraceDoc(function(elem) {
-			if (elem.tag === 'L' || elem.tag == 'xsl:element')
-				trace_lre.push(elem);
+			if (elem.type === 'LRE')
+				xpath_lookup[elem.xpath] = elem;
 		});
-	}
-	
-	/**
-	 * Search for parent node with specified name in tracing document
-	 * @param {Element} elem
-	 * @param {String} node_name
-	 * @return {Element}
-	 */
-	function findParent(elem, node_name) {
-		var result = null;
-		do {
-			if (elem.tag == node_name) {
-				result = elem;
-				break;
-			}
-		} while(elem = elem.parent);
-		
-		return result;
-	}
-	
-	/**
-	 * Search for template node for specified element
-	 * @param {Element} elem
-	 * @return {Element}
-	 */
-	function findTemplate(elem){
-		if (!elem) return null;
-		var meta = elem.meta;
-		var res = resource.getResource('xsl', parseInt(meta.m, 10));
-		var result = searchTagByLineCol(res, meta.l, meta.c);
-		if (!result)
-			console.error('resource chain broken');
-		
-		return result;
-	}
-	
-	/**
-	 * Search for data source for specified element 
-	 * @param {Object} template_node
-	 * @return {Element}
-	 */
-	function findSource(template_node){
-		if (!template_node)
-			return;
-			
-		// search for src element
-		var src,
-			el = template_node;
-		do {
-			if (el.src) {
-				src = el.src;
-				break;
-			}
-		} while(el = el.parent);
-		
-		
-		if (!src || !src.x) 
-			return null;
-		
-		var source_doc = resource.getResource('xml', src.f === 'SOURCE' ? 0 : parseInt(src.f, 10) + 1);
-		return  utils.xpathFind(src.x, source_doc);
 	}
 	
 	/**
@@ -298,18 +182,13 @@
 	 */
 	function buildElementDependency(doc){
 		var result_elems = doc.getElementsByTagName('*');
-		utils.each(trace_lre, function(i, /* Element */ node){
-			// TODO научиться работать с комментариями, пришедшими в результатирующий документ
-			var r = result_elems[i];
-			
-			if (r) {
-				var template_node = findParent(node, 'xsl:template');
-				r.__trace = {
-					trace: node,
-					source: findSource(template_node),
-					module: template_node.meta.m,
-					template: findTemplate(template_node),
-					result: r
+		
+		utils.each(doc.getElementsByTagName('*'), function(i, /* Element */ node) {
+			var xpath = utils.createXPath(node);
+			if (xpath in xpath_lookup) {
+				node.__trace = {
+					trace: xpath_lookup[xpath],
+					result: node // backreference
 				};
 			}
 		});
@@ -355,41 +234,35 @@
 			this.dispatchEvent(EVT_INIT);
 			
 			// start document loading
-			
-			// we should load source document first in order to maintain
-			// correct document's index positions
-			resource.load(options.source_url, 'xml', function(data) {
-				// ..then load tracing data
-				resource.load(options.trace_url, 'trace', function(data) {
-					if (typeof data == 'string') {
-						try {
-							data = JSON.parse(data);
-						} catch (e) {
-							data = null;
-							xsl_tracer.dispatchEvent(EVT_ERROR, {
-								url: options.trace_url,
-								error_code: 0,
-								error_data: e.toString()
-							});
-						}
-					}
-					
-					if (data) {
-						// save trace data
-						resource.setResource('trace', 0, data);
-						
-						// ...and now load all the rest external references
-						utils.each(data['xsl'], function(i, n) {
-							resource.load(resolvePath(n, 'xsl'), 'xsl');
-						});
-						
-						utils.each(data['xml'], function(i, n) {
-							resource.load(resolvePath(n, 'xml'), 'xml');
+			resource.load(options.trace_url, 'trace', function(data) {
+				if (typeof data == 'string') {
+					try {
+						data = JSON.parse(data);
+					} catch (e) {
+						data = null;
+						xsl_tracer.dispatchEvent(EVT_ERROR, {
+							url: options.trace_url,
+							error_code: 0,
+							error_data: e.toString()
 						});
 					}
+				}
+				
+				if (data) {
+					// save trace data
+					resource.setResource('trace', 0, data);
 					
-					resource.load(options.result_url, 'result');
-				});
+					// ...and now load all the rest external references
+					utils.each(data['xsl'], function(i, n) {
+						resource.load(resolvePath(n, 'xsl'), 'xsl');
+					});
+					
+					utils.each(data['xml'], function(i, n) {
+						resource.load((n == 'SOURCE') ? options.source_url : resolvePath(n, 'xml'), 'xml');
+					});
+				}
+				
+				resource.load(options.result_url, 'result');
 			});
 		},
 		
@@ -429,8 +302,6 @@
 		 */
 		setPathResolver: function(fn) {
 			resolvePath = fn;
-		},
-		
-		searchTagByLineCol: searchTagByLineCol
+		}
 	}
 })();

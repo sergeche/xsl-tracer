@@ -160,13 +160,35 @@
 		
 		/**
 		 * Returns single resource's name/url
-		 * @param {Stirng} dict_name Resource dictionary
+		 * @param {Stirng|Object} dict_name Resource dictionary or trace resource
+		 * reference
 		 * @param {String|Number} res_name Resource name/url or index
 		 * @return {String|null}
 		 */
 		getResourceName: function(dict_name, res_name) {
+			if (typeof dict_name == 'object') {
+				// passing trace resource reference
+				res_name = dict_name.i;
+				dict_name = dict_name.v;
+			}
+			
 			var res = getResource(dict_name, res_name);
 			return res ? res.name : null;
+		},
+		
+		/**
+		 * Returns resource DOM element by xpath specified in <code>trace_info</code>
+		 * @param {Object} trace_info Tracing resource reference
+		 * @return {Element}
+		 */
+		getResourceElement: function(trace_info) {
+			if (trace_info) {
+				var res = this.getResource(trace_info.v, trace_info.i);
+				if (res)
+					return utils.xpathFind(trace_info.xpath, res);
+			}
+				
+			return null;
 		},
 		
 		/**

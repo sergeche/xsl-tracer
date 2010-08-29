@@ -175,6 +175,9 @@ var utils = function(){
 			
 			walk(node);
 			var result = parts.join('/');
+			
+			// remove internal wrapper, if any
+			result = result.replace(/^xsl\-tracer\[1\]\/?/i, '');
 			return (!context) ? '/' + result : result;
 			
 		},

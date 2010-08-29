@@ -21,23 +21,37 @@
 	 * @param {Object} trace_obj
 	 */
 	function updateXSLSection(trace_obj) {
-		// get file name
-		var file_name = resource.getResourceName('xsl', trace_obj.trace.meta.m);
-		section_xsl.find('.xt-subtitle')
-			.text(file_name + ':' + trace_obj.trace.meta.l)
-			.data('file-info', {
-				type: 'xsl',
-				name: trace_obj.trace.meta.m,
-				hl: trace_obj.template
-			});
-				
-		var xpath = utils.createXPath(trace_obj.template);
-		section_xsl.find('.xt-xpath').text(xpath);
-		section_xsl.find('.xt-copy-buf').empty().append(utils.createClippy(xpath));
+		var template,
+			_trace = trace_obj.trace;
+			
+		// find template definition
+		do {
+			if (_trace.name == 'xsl:template' && _trace.src) {
+				template = _trace;
+				break;
+			}
+		} while (_trace = _trace.parent);
 		
-		section_xsl.find('.xt-section-content').empty().append(
-			renderer.renderXml(trace_obj.template)
-		);
+		if (template) {
+			// get file name
+			var file_name = resource.getResourceName(template.src),
+				template_elem = resource.getResourceElement(template.src);
+			section_xsl.find('.xt-subtitle')
+				.text(file_name + ':' + template.src.l)
+				.data('file-info', {
+					type: template.src.v,
+					name: template.src.i,
+					hl: template_elem
+				});
+					
+			var xpath = template.src.xpath;
+			section_xsl.find('.xt-xpath').text(xpath);
+			section_xsl.find('.xt-copy-buf').empty().append(utils.createClippy(xpath));
+			
+			section_xsl.find('.xt-section-content').empty().append(
+				renderer.renderXml(template_elem)
+			);
+		}
 	}
 	
 	/**
@@ -49,34 +63,30 @@
 		var src,
 			el = trace_obj.trace;
 		do {
-			if (el.src) {
-				src = el.src;
+			if (el.ctx) {
+				src = el.ctx;
 				break;
 			}
 		} while(el = el.parent);
 		
 		if (src) {
 			// get file name
-			var file_name = src.f;
-			if (file_name !== 'SOURCE') {
-				file_name = resource.getResourceName('xml', parseInt(file_name) + 1);
-			}
+			var file_name = resource.getResourceName(src),
+				context_elem = resource.getResourceElement(src);
 				
 			section_xml.find('.xt-subtitle')
 				.data('file-info', {
-					type: 'xml',
-					name: (src.f === 'SOURCE') ? 0 : parseInt(src.f) + 1,
-					hl: trace_obj.source
+					type: src.v,
+					name: src.i,
+					hl: context_elem
 				})
-				.text(file_name);
+				.text(file_name + ':' + src.l);
 				
-			section_xml.find('.xt-xpath').text(src.x);
-			section_xml.find('.xt-copy-buf').empty().append(utils.createClippy(src.x));
+			section_xml.find('.xt-xpath').text(src.xpath);
+			section_xml.find('.xt-copy-buf').empty().append(utils.createClippy(src.xpath));
 			section_xml.find('.xt-section-content').empty().append(
-				renderer.renderXml(trace_obj.source)
+				renderer.renderXml(context_elem)
 			);
-		} else {
-			console.log('Can\'t find source');
 		}
 	}
 	
@@ -86,11 +96,13 @@
 	 * @return {String}
 	 */
 	function createTagFromTrace(trace_node) {
-		var result = '&lt;' + trace_node.tag;
-		if (trace_node.attrs) {
-			var a = trace_node.attrs;
-			for (var p in a) if (a.hasOwnProperty(p)) {
-				result += ' ' + p + '="' + utils.escapeHTML(a[p]) + '"';
+		var result = '&lt;' + trace_node.name,
+			elem = resource.getResourceElement(trace_node.src);
+		
+		if (elem) {
+			var a = elem.attributes;
+			for (var i = 0, il = a.length; i < il; i++) {
+				result += ' ' + a[i].nodeName + '="' + utils.escapeHTML(a[i].nodeValue) + '"';
 			}
 		}
 		
@@ -106,7 +118,7 @@
 		var callstack = [],
 			el = trace_obj.trace;
 		do {
-			if (el.tag in call_tags)
+			if (el.name in call_tags)
 				callstack.push(el);
 		} while (el = el.parent);
 		
@@ -119,11 +131,11 @@
 		$.each(callstack, function(i, n) {
 			item = $('<li></li>');
 			item.append(
-				$('<div class="xt-file-link">' + resource.getResourceName('xsl', n.meta.m) + ':' + n.meta.l + '</div>')
+				$('<div class="xt-file-link">' + resource.getResourceName(n.src) + ':' + n.src.l + '</div>')
 					.data('file-info', {
-						type: 'xsl',
-						name: n.meta.m,
-						hl: n.meta.l + '-' + n.meta.c
+						type: n.src.v,
+						name: n.src.i,
+						hl: resource.getResourceElement(n.src)
 					})
 			);
 			item.append($('<div class="xt-callstack-title">' + createTagFromTrace(n) + '</div>'));
