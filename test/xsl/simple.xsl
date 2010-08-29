@@ -11,11 +11,21 @@
 	<xsl:variable name="ext2" select="document('../xml/external.xml')/document/label"/>
 	
 	<xsl:template match="&root;">
+		<xsl:variable name="footer">
+			<p><span>footer</span></p>
+			<div class="sample"><a>
+				<em>Footer 2</em>
+			</a></div>
+		</xsl:variable>
 		<div id="page" class="layout-right">
 			<ul>
 				<xsl:apply-templates select="&item;" mode="index"/>
 			</ul>
-		</div>	
+		</div>
+		<blockquote>
+			<xsl:copy-of select="$footer"/>
+			<xsl:copy-of select="&item;[1]"/>
+		</blockquote>
 	</xsl:template>
 	
 	<xsl:template match="&item;" mode="index">

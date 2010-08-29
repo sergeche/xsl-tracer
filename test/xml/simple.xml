@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <document>
-	<item class="test1">item 1</item>
+	<item class="test1">
+		<div class="c1">
+			<em class="c2">item 1</em>
+		</div>
+	</item>
 	<item class="test2">item 2</item>
 	<item class="test3">item 3</item>
 	<item class="test4">item 4</item>
