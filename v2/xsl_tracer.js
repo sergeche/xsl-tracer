@@ -45,7 +45,8 @@
 	function removeEntityReferences(text) {
 		return text
 			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i, '')
-			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+[^\[]*\[((?:.|[\r\n])+?)\]\s*>/i, '');
+			.replace(/<\!DOCTYPE\s+[\w\:]+\s+[^\[]*?\[((?:.|[\r\n])+?)\]\s*>/i, '')
+			.replace(/<\!DOCTYPE[^>]+?>/i, '')
 	}
 	
 	/**
@@ -121,6 +122,8 @@
 					error_code: 'xml_parsing_error',
 					error_data: error_data
 				});
+				
+				console.log(data);
 				
 				return null;
 			}
@@ -315,7 +318,11 @@
 			if (document.getElementById('xt-global-error'))
 				return;
 			
-			templates_root = options.template_path;
+			if (options.template_path)
+				templates_root = options.template_path;
+			else
+				templates_root = utils.getBasePath(options.template_url);
+				
 			this.dispatchEvent(EVT_INIT);
 			
 			// start document loading
@@ -324,12 +331,17 @@
 					try {
 						data = JSON.parse(data);
 					} catch (e) {
-						data = null;
-						xsl_tracer.dispatchEvent(EVT_ERROR, {
-							url: options.trace_url,
-							error_code: 0,
-							error_data: e.toString()
-						});
+						try {
+							// do some eval parsing
+							data = (new Function("return " + data))();
+						} catch (e) {
+							data = null;
+							xsl_tracer.dispatchEvent(EVT_ERROR, {
+								url: options.trace_url,
+								error_code: 0,
+								error_data: e.toString()
+							});
+						}
 					}
 				}
 				

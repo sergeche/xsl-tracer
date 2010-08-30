@@ -60,9 +60,10 @@
 	width:10px;
 	height:1em;
 	margin-right:-10px;
+	margin-left:-0.9em;
+	margin-top:0.15em;
 	cursor:pointer;
-	position:relative;
-	left:-0.9em;
+	position:absolute;
 	opacity:0;
 	-webkit-transition:opacity 0.2s linear 0;
 	-o-transition:opacity 0.2s linear 0;
