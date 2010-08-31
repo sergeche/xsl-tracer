@@ -22,7 +22,7 @@
 	function resizePanel(height) {
 		height = Math.min(max_height, Math.max(min_height, height));
 		panel.css('height', height);
-		page_body.css('height', available_height - height);
+		page_body.css('bottom', height);
 	}
 	
 	function updateLimits() {
