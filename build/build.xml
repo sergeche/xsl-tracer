@@ -22,7 +22,7 @@
 	</target>
 
 	<target name="tracer.js" depends="tracer.init">
-		<compile-js-lib tofile="${js.dir}/xsl_tracer.js">
+		<compile-js-lib tofile="${js.dir}/xsl-tracer.js">
 			<filelist dir="${js-src.dir}">
 				<file name="__intro.js" />
 				<file name="lib/EventDispatcher.js"/>
@@ -37,7 +37,7 @@
 				<file name="top-panel.js"/>
 				<file name="ui.js"/>
 				<file name="preloader.js"/>
-				<!-- <file name="bottom-panel.js"/> -->
+				<file name="bottom-panel.js"/>
 				<file name="__outro.js" />
 			</filelist>
 		</compile-js-lib>
