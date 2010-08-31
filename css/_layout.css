@@ -150,6 +150,9 @@ body {
 	font-size:9px;
 	position:relative;
 	top:-1px;
+	/* Makes text look better (because of flash problem) */
+	display:inline-block;
+	background:inherit;
 }
 
 .xt-copy-buf {
@@ -238,4 +241,24 @@ body {
 
 .xt-document {
 	display:none;
+}
+
+#webkit-copy-clip {
+	position:absolute;
+	width:50%;
+	overflow:auto;
+	top: 0;
+	/* left:-60%; */
+	background:#fff;
+	-webkit-user-modify:read-write;
+}
+
+.xt-webkit-copy {
+	display:inline-block;
+	width:14px;
+	height:14px;
+	background:red;
+	cursor:pointer;
+	overflow:hidden;
+	outline:none;
 }
