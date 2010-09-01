@@ -57,7 +57,7 @@
 	/**
 	 * Updates single XML tab content based on trace data
 	 */
-	function updateTabContent(trace_data, class_name) {
+	function updateTabContent(trace_data, class_name, limit) {
 		// get file name
 		var file_name = resource.getResourceName(trace_data),
 			context_elem = resource.getResourceElement(trace_data);
@@ -75,7 +75,7 @@
 			.find('.xt-copy-buf').empty().append(utils.createClippy(trace_data.xpath));
 			
 		output_elems.filter('dd').empty().append(
-			renderer.renderXml(context_elem)
+			renderer.renderXml(context_elem, limit)
 		);
 	}
 	
@@ -96,7 +96,7 @@
 		} while(el = el.parent);
 		
 		if (src) 
-			updateTabContent(src, '.xt-trace-context');
+			updateTabContent(src, '.xt-trace-context', 10);
 	}
 	
 	/**
@@ -139,10 +139,40 @@
 	}
 	
 	/**
-	 * Updates XML section contents based on tracing object
-	 * @param {Object} trace_obj
+	 * Renders list of template calls in callstack section
+	 * @param {String} title List title
+	 * @param {Array} calls List of template calls trace objects 
 	 */
-	function updateCallstackSection(trace_obj) {
+	function renderCallList(title, calls) {
+		if (calls && calls.length) {
+			var output = [],
+				list = $('<ul class="xt-callstack"></ul>'),
+				item;
+				
+			$.each(calls, function(i, n) {
+				item = $('<li></li>');
+				item.append(
+					$('<div class="xt-file-link">' + resource.getResourceName(n.src) + ':' + n.src.l + '</div>')
+						.data('file-info', {
+							type: n.src.v,
+							name: n.src.i,
+							hl: resource.getResourceElement(n.src)
+						})
+				);
+				item.append($('<div class="xt-callstack-title">' + createTagFromTrace(n) + '</div>'));
+				list.append(item);
+			});
+			
+			section_callstack.append('<h3><span class="xt-title">' + title + '</span></h3>');
+			section_callstack.append(list);
+		}
+	}
+	
+	/**
+	 * Outputs callstack (outer calls) into callstack section
+	 * @param {Object} trace_obj Trace data
+	 */
+	function showCallstack(trace_obj) {
 		// create call stack list
 		var callstack = [],
 			el = trace_obj.trace;
@@ -152,26 +182,53 @@
 		} while (el = el.parent);
 		
 		// output callstack
-		section_callstack.find('.xt-callstack').remove();
-		var output = [],
-			list = $('<ul class="xt-callstack"></ul>'),
-			item;
+		renderCallList('Call stack', callstack);
+	}
+	
+	/**
+	 * Outputs inner calls, a list of applied templates which cannot be 
+	 * displayed at this moment in main document tab (like attribute or text
+	 * matched templates) 
+	 * @param {Object} trace_obj Trace data
+	 */
+	function showInnerCalls(trace_obj) {
+		// find all inner template calls which does not produce LRE
+		var call_list = [],
+			el = trace_obj.trace;
 			
-		$.each(callstack, function(i, n) {
-			item = $('<li></li>');
-			item.append(
-				$('<div class="xt-file-link">' + resource.getResourceName(n.src) + ':' + n.src.l + '</div>')
-					.data('file-info', {
-						type: n.src.v,
-						name: n.src.i,
-						hl: resource.getResourceElement(n.src)
-					})
-			);
-			item.append($('<div class="xt-callstack-title">' + createTagFromTrace(n) + '</div>'));
-			list.append(item);
-		});
+		function findTemplates(node) {
+			for (var i = 0, il = node.children.length; i < il; i++) {
+				var n = node.children[i];
+				if (n == 'xsl:template') {
+					// check if there's no direct LRE children
+					var has_lre = false;
+					for (var j = 0, jl = n.children.length; j < jl; j++) {
+						if (n.children[j].type == 'LRE') {
+							has_lre = true;
+							break;
+						}
+					}
+					
+					if (!has_lre) {
+						call_list.push(n);
+					}
+				} else {
+					findTemplates(n);
+				}
+			}
+		}
 		
-		section_callstack.append(list);
+		renderCallList('Inner calls', call_list);
+	}
+	
+	/**
+	 * Updates XML section contents based on tracing object
+	 * @param {Object} trace_obj
+	 */
+	function updateCallstackSection(trace_obj) {
+		section_callstack.empty();
+		showCallstack(trace_obj);
+		showInnerCalls(trace_obj);
 	}
 	
 	/**

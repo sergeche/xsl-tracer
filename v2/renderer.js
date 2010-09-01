@@ -21,25 +21,32 @@
 	 * @param {Node} node
 	 * @return {String}
 	 */
-	function stylize(node) {
+	function stylize(node, counter) {
 		if (node) {
-			switch (node.nodeType) {
-				case 1: // element
-					// some elements should be skipped
-					if (node.nodeName == 'xsl-tracer') {
-						var result = [];
-						for (var i = 0, il = node.childNodes.length; i < il; i++) {
-							result.push(stylize(node.childNodes[i]));
+			if (counter.cur < counter.limit) {
+				switch (node.nodeType) {
+					case 1: // element
+						// some elements should be skipped
+						if (node.nodeName == 'xsl-tracer') {
+							var result = [];
+							for (var i = 0, il = node.childNodes.length; i < il; i++) {
+								counter.cur++;
+								result.push(stylize(node.childNodes[i], counter));
+							}
+							
+							return result.join('');
+						} else {
+							counter.cur++;
+							return stylizeElement(node, counter);
 						}
-						
-						return result.join('');
-					} else {
-						return stylizeElement(node);
-					}
-				case 3: // text node
-					return stylizeTextNode(node);
-				case 9: // document
-					return stylize(node.documentElement);
+					case 3: // text node
+						return stylizeTextNode(node);
+					case 9: // document
+						return stylize(node.documentElement, counter);
+				}
+			} else if (counter.cur == counter.limit) {
+				counter.cur++;
+				return '<span class="xt-clr-truncate"></span>';
 			}
 		}
 		
@@ -51,7 +58,7 @@
 	 * @param {Element} node
 	 * @return {String} 
 	 */
-	function stylizeElement(node) {
+	function stylizeElement(node, counter) {
 		var attrs = [];
 		utils.each(node.attributes, function(i, n) {
 			attrs.push('<span class="xt-clr-attr"><span class="xt-clr-attr-name">' + n.nodeName + '</span>' +				'="' +				'<span class="xt-clr-attr-value">' + n.nodeValue + '</span>' +				'"</span>');
@@ -81,7 +88,7 @@
 		} else {
 			result.push('&gt;</span>');
 			utils.each(node.childNodes, function(i, n) {
-				result.push(stylize(n));
+				result.push(stylize(n, counter));
 			});
 			
 			result.push('<span class="xt-clr-tag-close">&lt;/' +
@@ -105,14 +112,19 @@
 		/**
 		 * Render XML fragment as styled HTML tree
 		 * @param {Element} elem
+		 * @param {Number} limit How many nodes to render
 		 */
-		renderXml: function(elem) {
+		renderXml: function(elem, limit) {
 			var div = document.createElement('div');
 			if (!elem)
 				return div;
 			
+			var counter = {
+				cur: 0,
+				limit: limit || Number.POSITIVE_INFINITY
+			};
 			
-			div.innerHTML = stylize(elem);
+			div.innerHTML = stylize(elem, counter);
 			if (elem.nodeType == 9)
 				elem = elem.firstChild;
 				

@@ -65,10 +65,9 @@
 	margin-top:0.15em;
 	cursor:pointer;
 	position:absolute;
-	opacity:0;
-	-webkit-transition:opacity 0.2s linear 0;
-	-o-transition:opacity 0.2s linear 0;
-	transition:opacity 0.2s linear 0;
+	visibility:hidden;
+	/* opacity:0; */
+	/* -webkit-transition:opacity 0.2s linear 0;	-o-transition:opacity 0.2s linear 0;	transition:opacity 0.2s linear 0; */
 }
 
 .xt-clr-tag-switcher:before {
@@ -79,7 +78,8 @@
 }
 
 .xt-clr-tag:hover > .xt-clr-tag-switcher {
-	opacity:1;
+	/* opacity:1; */
+	visibility:visible;
 }
 
 .xt-collapsed > .xt-clr-tag-switcher {
@@ -133,4 +133,13 @@
 
 .xt-clr-one-line > .xt-clr-tag-switcher {
 	display: none;
+}
+
+.xt-clr-truncate {
+	display:block;
+}
+
+.xt-clr-truncate:after {
+	content:'--skipped--';
+	color:#ccc;
 }
