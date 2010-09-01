@@ -115,7 +115,7 @@ body {
 	display:block;
 }
 
-.xt-section h2 .xt-subtitle {
+.xt-section .xt-subtitle {
 	color: rgba(255, 255, 255, 0.7);
 	float: right;
 	font-size: 10px;
@@ -126,12 +126,13 @@ body {
 	display:block;
 }
 
-.xt-section h3 {
+.xt-section h3,
+.xt-subtitle-plate {
 	-webkit-background-clip: padding;
 	-webkit-background-origin: padding;
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#F3F3F3), color-stop(0.05, #F3F3F3), color-stop(0.05, #E6E6E6), to(#D1D1D1));
 	background-image: -moz-linear-gradient(top, #F3F3F3, #D1D1D1);
-	background-color:#D1D1D1;
+	background-color:#e5e5e5;
 	border-bottom: 1px solid #BDBDBD;
 	border-top: 1px solid #BDBDBD;
 	color: #6E6E6E;
@@ -243,22 +244,15 @@ body {
 	display:none;
 }
 
-#webkit-copy-clip {
+#xt-xml-section > .xt-subtitle {
 	position:absolute;
-	width:50%;
-	overflow:auto;
-	top: 0;
-	/* left:-60%; */
-	background:#fff;
-	-webkit-user-modify:read-write;
+	right:0;
+	z-index:2;
+	line-height:18px;
+	padding-right:8px;
 }
 
-.xt-webkit-copy {
-	display:inline-block;
-	width:14px;
-	height:14px;
-	background:red;
-	cursor:pointer;
-	overflow:hidden;
-	outline:none;
+#xt-callstack-section h3 {
+	padding-left:15px;
+	padding-right:15px;
 }

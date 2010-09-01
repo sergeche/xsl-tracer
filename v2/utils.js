@@ -6,6 +6,8 @@
  * @include "xsl_tracer.js"
  */
 var utils = function(){
+	var clippy_url = './i/clippy.swf';
+	
 	/**
 	 * Split text into lines. Set <code>remove_empty</code> to true to filter
 	 * empty lines
@@ -355,13 +357,13 @@ var utils = function(){
 			var div = document.createElement('div');
 			text = encodeURIComponent(text);
 			div.innerHTML = '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="14" height="14">' +
-			    '<param name="movie" value="./i/clippy.swf"/>' +
+			    '<param name="movie" value="' + clippy_url + '"/>' +
 			    '<param name="allowScriptAccess" value="always" />'+
 			    '<param name="quality" value="high" />' +
 			    '<param name="scale" value="noscale" />' +
 			    '<param name="FlashVars" value="text=' + text + '" />' +
 			    '<param name="bgcolor" value="#ffffff" />' +
-			    '<embed src="./i/clippy.swf" width="14" height="14" scale="noscale" quality="high" allowScriptAccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" FlashVars="text=' + text + '" bgcolor="#ffffff" />' +
+			    '<embed src="' + clippy_url + '" width="14" height="14" scale="noscale" quality="high" allowScriptAccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" FlashVars="text=' + text + '" bgcolor="#ffffff" />' +
 			'</object>';
 			
 			return div.firstChild;

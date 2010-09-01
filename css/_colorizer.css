@@ -1,5 +1,6 @@
 .xt-clr-tag {
 	padding:0.25em 0 0.2em 15px;
+	background-color:#fff; /* makes text rendering in Safari better */
 	font-family:monospace;
 	position:relative;
 	display: block;

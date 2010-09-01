@@ -55,39 +55,68 @@
 	}
 	
 	/**
-	 * Updates XML section contents based on tracing object
+	 * Updates single XML tab content based on trace data
+	 */
+	function updateTabContent(trace_data, class_name) {
+		// get file name
+		var file_name = resource.getResourceName(trace_data),
+			context_elem = resource.getResourceElement(trace_data);
+			
+		var output_elems = section_xml.find(class_name);
+		
+		output_elems.filter('dt')
+			.data('file-info', {
+				type: trace_data.v,
+				name: trace_data.i,
+				hl: context_elem,
+				display_string: file_name + ':' + trace_data.l
+			})
+			.find('.xt-xpath').text(trace_data.xpath).end()
+			.find('.xt-copy-buf').empty().append(utils.createClippy(trace_data.xpath));
+			
+		output_elems.filter('dd').empty().append(
+			renderer.renderXml(context_elem)
+		);
+	}
+	
+	/**
+	 * Updates XML context section content based on tracing object, displaying
+	 * context node of selected element's applied template
 	 * @param {Object} trace_obj
 	 */
-	function updateXMLSection(trace_obj) {
+	function updateXMLContextSection(trace_obj) {
 		// find element with source object
 		var src,
 			el = trace_obj.trace;
 		do {
-			if (el.ctx || (el.src && el.type == 'LRE')) {
-				src = el.ctx || el.src;
+			if (el.ctx) {
+				src = el.ctx;
 				break;
 			}
 		} while(el = el.parent);
 		
-		if (src) {
-			// get file name
-			var file_name = resource.getResourceName(src),
-				context_elem = resource.getResourceElement(src);
-				
-			section_xml.find('.xt-subtitle')
-				.data('file-info', {
-					type: src.v,
-					name: src.i,
-					hl: context_elem
-				})
-				.text(file_name + ':' + src.l);
-				
-			section_xml.find('.xt-xpath').text(src.xpath);
-			section_xml.find('.xt-copy-buf').empty().append(utils.createClippy(src.xpath));
-			section_xml.find('.xt-section-content').empty().append(
-				renderer.renderXml(context_elem)
-			);
-		}
+		if (src) 
+			updateTabContent(src, '.xt-trace-context');
+	}
+	
+	/**
+	 * Updates XML source section content based on tracing object, displaying
+	 * source (basically XSL) node of selected element's applied template
+	 * @param {Object} trace_obj
+	 */
+	function updateXMLSourceSection(trace_obj) {
+		// find element with source object
+		var src,
+			el = trace_obj.trace;
+		do {
+			if (el.src && el.type == 'LRE') {
+				src = el.src;
+				break;
+			}
+		} while(el = el.parent);
+		
+		if (src) 
+			updateTabContent(src, '.xt-trace-source');
 	}
 	
 	/**
@@ -145,12 +174,41 @@
 		section_callstack.append(list);
 	}
 	
+	/**
+	 * Update displayed file url of XML section depending on selected tab
+	 */
+	function updateTabFileLink() {
+		var selected_tab = section_xml.find('.xt-section-tabs > dt.xt-active'),
+			file_info = selected_tab.data('file-info'),
+			file_link = section_xml.find('.xt-file-link');
+			
+		file_link.text('').data('file-info', null);
+		
+		if (file_info) {
+			file_link
+				.text(file_info.display_string)
+				.data(file_info);
+		}
+	}
+	
 	xsl_tracer.addEvent(EVT_TRACE, function(evt) {
 		var trace_obj = evt.data;
 		if (trace_obj) {
 			updateXSLSection(trace_obj);
-			updateXMLSection(trace_obj);
+			updateXMLContextSection(trace_obj);
+			updateXMLSourceSection(trace_obj);
+//			updateXMLSection(trace_obj);
 			updateCallstackSection(trace_obj);
+			
+			updateTabFileLink();
 		}
 	});
+	
+	section_xml.find('.xt-section-tabs > dt').click(function() {
+		var cur_tab = $(this);
+		if (!cur_tab.hasClass('xt-active')) {
+			cur_tab.addClass('xt-active').siblings().removeClass('xt-active');
+			updateTabFileLink();
+		}
+	})
 });

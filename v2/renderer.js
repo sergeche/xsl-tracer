@@ -25,11 +25,21 @@
 		if (node) {
 			switch (node.nodeType) {
 				case 1: // element
-					return stylizeElement(node);
+					// some elements should be skipped
+					if (node.nodeName == 'xsl-tracer') {
+						var result = [];
+						for (var i = 0, il = node.childNodes.length; i < il; i++) {
+							result.push(stylize(node.childNodes[i]));
+						}
+						
+						return result.join('');
+					} else {
+						return stylizeElement(node);
+					}
 				case 3: // text node
 					return stylizeTextNode(node);
 				case 9: // document
-					return stylizeElement(node.documentElement);
+					return stylize(node.documentElement);
 			}
 		}
 		

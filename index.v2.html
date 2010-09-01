@@ -42,33 +42,35 @@
 				</div>
 			</div>			<div id="xt-page-body">				<div id="xt-content"></div>			</div>			<div id="xt-trace-info">				<div class="xt-panel-header">XSL trace panel</div>
 				<div class="xt-section" id="xt-xsl-section">
-					<h2>
-						<span class="xt-subtitle xt-file-link"></span>
-						<span class="xt-title">XSL</span>
-					</h2>
-					<h3>
-						<span class="xt-copy-buf"></span>
-						<span class="xt-xpath"></span>
-					</h3>
-					<div class="xt-section-content"></div>
+					<h2>						<span class="xt-subtitle xt-file-link"></span>						<span class="xt-title">XSL</span>					</h2>					<h3>						<span class="xt-copy-buf"></span>						<span class="xt-xpath"></span>					</h3>					<div class="xt-section-content"></div>
 				</div>				<div class="xt-section" id="xt-xml-section">
-					<h2>
-						<span class="xt-subtitle xt-file-link"></span>
-						<span class="xt-title">Context XML</span>
-					</h2>
-					<h3>
-						<span class="xt-copy-buf"></span>
-						<span class="xt-xpath"></span>
-					</h3>
-					<div class="xt-section-content"></div>
+					<div class="xt-subtitle xt-file-link"></div>
+					<dl class="xt-section-tabs">
+						<dt class="xt-active xt-trace-context">
+							<div>Context</div>
+							<div class="xt-subtitle-plate">
+								<span class="xt-copy-buf"></span>
+								<span class="xt-xpath"></span>
+							</div>
+						</dt>
+						<dd class="xt-trace-context"></dd>
+						<dt class="xt-trace-source">
+							<div>Source</div>
+							<div class="xt-subtitle-plate">
+								<span class="xt-copy-buf"></span>
+								<span class="xt-xpath"></span>
+							</div>
+						</dt>
+						<dd class="xt-trace-source"></dd>
+					</dl>
+					<!-- <h2>						<span class="xt-subtitle xt-file-link"></span>						<span class="xt-title">Context XML</span>					</h2>					<h3>						<span class="xt-copy-buf"></span>						<span class="xt-xpath"></span>					</h3>					<div class="xt-section-content"></div> -->
 				</div>				<div class="xt-section" id="xt-callstack-section">
-					<h3>
-						<span class="xt-title">Call stack</span>
-					</h3>
+					<h3><span class="xt-title">Call stack</span></h3>
 				</div>			</div>		</div>
 		
 		<script type="text/javascript">
 			$(function(){
+//				return;
 			 	xsl_tracer.init({
 			 		template_path: './test/xsl/',
 			 		source_url: './test/xml/simple.xml',
