@@ -26,19 +26,8 @@
 			if (counter.cur < counter.limit) {
 				switch (node.nodeType) {
 					case 1: // element
-						// some elements should be skipped
-						if (node.nodeName == 'xsl-tracer') {
-							var result = [];
-							for (var i = 0, il = node.childNodes.length; i < il; i++) {
-								counter.cur++;
-								result.push(stylize(node.childNodes[i], counter));
-							}
-							
-							return result.join('');
-						} else {
-							counter.cur++;
-							return stylizeElement(node, counter);
-						}
+						counter.cur++;
+						return stylizeElement(node, counter);
 					case 3: // text node
 						return stylizeTextNode(node);
 					case 9: // document

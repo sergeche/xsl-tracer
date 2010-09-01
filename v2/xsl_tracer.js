@@ -68,10 +68,7 @@
 			text = text.substring(0, m.index) + text.substring(end_pos);
 		}
 		
-		return text
-//			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i, '')
-//			.replace(/<\!DOCTYPE\s+[\w\:]+\s+[^\[]*?\[((?:.|[\r\n])+?)\]\s*>/i, '')
-//			.replace(/<\!DOCTYPE[^>]+?>/i, '')
+		return text;
 	}
 	
 	/**
@@ -148,7 +145,7 @@
 					error_data: error_data
 				});
 				
-				console.log(data);
+//				console.log(data);
 				
 				return null;
 			}
@@ -294,8 +291,6 @@
 	 * @param {Document} doc 
 	 */
 	function buildElementDependency(doc){
-		var result_elems = doc.getElementsByTagName('*');
-		
 		utils.each(doc.getElementsByTagName('*'), function(i, /* Element */ node) {
 			var xpath = utils.createXPath(node);
 			if (xpath in xpath_lookup) {

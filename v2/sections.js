@@ -97,6 +97,8 @@
 		
 		if (src) 
 			updateTabContent(src, '.xt-trace-context', 10);
+		else
+			console.log('no context', trace_obj);
 	}
 	
 	/**
