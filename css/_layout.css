@@ -256,3 +256,7 @@ body {
 	padding-left:15px;
 	padding-right:15px;
 }
+
+#xt-callstack-section ul + h3 {
+	border-top:0;
+}

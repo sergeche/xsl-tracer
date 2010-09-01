@@ -44,7 +44,7 @@
 	 */
 	function removeEntityReferences(text) {
 		// removing doctype is a bit tricky — use text parsing instead regexp
-		var m = text.match(/<\!DOCTYPE\s/i);
+		var m = text.match(/<\!DOCTYPE/i);
 		if (m) {
 			var pos = m.index + m[0].length,
 				end_pos = pos,

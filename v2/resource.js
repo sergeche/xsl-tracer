@@ -99,11 +99,7 @@
 				// passing already loaded resource
 				var data = url;
 				if (url instanceof Element) {
-					if (url.childNodes.length == 1 && url.firstChild.nodeType == 3) {
-						data = utils.unescapeHTML(url.innerHTML);
-					} else {
-						data = utils.trim(url.innerHTML);
-					}
+					data = utils.unescapeHTML(url.innerHTML);
 				}
 				
 				addResource(dict_name, data);

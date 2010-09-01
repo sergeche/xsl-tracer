@@ -13,7 +13,7 @@
 	background-color:#A2B1CF;
 	border-top: 1px solid #91A0C0;
 	position:absolute;
-	width:100%;
+	width:120%;
 	left:0;
 	height:19px;
 	overflow:hidden;
@@ -51,6 +51,7 @@
 	padding:0.5em 0;
 	overflow:auto;
 	background:#fff;
+	font-size:11px;
 }
 
 .xt-section-tabs dt .xt-subtitle-plate {

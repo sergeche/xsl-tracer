@@ -195,13 +195,12 @@
 	 */
 	function showInnerCalls(trace_obj) {
 		// find all inner template calls which does not produce LRE
-		var call_list = [],
-			el = trace_obj.trace;
+		var call_list = [];
 			
 		function findTemplates(node) {
 			for (var i = 0, il = node.children.length; i < il; i++) {
 				var n = node.children[i];
-				if (n == 'xsl:template') {
+				if (n.name == 'xsl:template') {
 					// check if there's no direct LRE children
 					var has_lre = false;
 					for (var j = 0, jl = n.children.length; j < jl; j++) {
@@ -219,6 +218,9 @@
 				}
 			}
 		}
+		
+		console.log('find inner calls in', trace_obj.trace);
+		findTemplates(trace_obj.trace);
 		
 		renderCallList('Inner calls', call_list);
 	}
@@ -245,8 +247,8 @@
 		
 		if (file_info) {
 			file_link
-				.text(file_info.display_string)
-				.data(file_info);
+				.data('file-info', file_info)
+				.text(file_info.display_string);
 		}
 	}
 	
