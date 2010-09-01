@@ -6,7 +6,7 @@
  * @include "xsl_tracer.js"
  */
 var utils = function(){
-	var clippy_url = './i/clippy.swf';
+	var clippy_url = 'http://media.chikuyonok.ru/xsl-tracer/clippy.swf';
 	
 	/**
 	 * Split text into lines. Set <code>remove_empty</code> to true to filter
