@@ -38,6 +38,7 @@
 				template_elem = resource.getResourceElement(template.src);
 			section_xsl.find('.xt-subtitle')
 				.text(file_name + ':' + template.src.l)
+				.attr('title', file_name + ':' + template.src.l)
 				.data('file-info', {
 					type: template.src.v,
 					name: template.src.i,
@@ -97,8 +98,6 @@
 		
 		if (src) 
 			updateTabContent(src, '.xt-trace-context', 10);
-		else
-			console.log('no context', trace_obj);
 	}
 	
 	/**
@@ -153,8 +152,9 @@
 				
 			$.each(calls, function(i, n) {
 				item = $('<li></li>');
+				var file_title = resource.getResourceName(n.src) + ':' + n.src.l;
 				item.append(
-					$('<div class="xt-file-link">' + resource.getResourceName(n.src) + ':' + n.src.l + '</div>')
+					$('<div class="xt-file-link" title="' + file_title + '">' + file_title + '</div>')
 						.data('file-info', {
 							type: n.src.v,
 							name: n.src.i,
@@ -219,9 +219,7 @@
 			}
 		}
 		
-		console.log('find inner calls in', trace_obj.trace);
 		findTemplates(trace_obj.trace);
-		
 		renderCallList('Inner calls', call_list);
 	}
 	
@@ -248,6 +246,7 @@
 		if (file_info) {
 			file_link
 				.data('file-info', file_info)
+				.attr('title', file_info.display_string)
 				.text(file_info.display_string);
 		}
 	}
