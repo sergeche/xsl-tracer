@@ -43,10 +43,35 @@
 	 * @return {String}
 	 */
 	function removeEntityReferences(text) {
+		// removing doctype is a bit tricky — use text parsing instead regexp
+		var m = text.match(/<\!DOCTYPE\s/i);
+		if (m) {
+			var pos = m.index + m[0].length,
+				end_pos = pos,
+				brace = 0,
+				len = text.length,
+				ch;
+				
+			while (pos < len) {
+				ch = text.charAt(pos);
+				if (ch == '[')
+					brace++;
+				else if (ch == ']')
+					brace--;
+				else if (ch == '>' && (!brace || text.charAt(pos - 1) == ']')) {
+					end_pos = pos + 1;
+					break;
+				}
+				pos++;
+			}
+			
+			text = text.substring(0, m.index) + text.substring(end_pos);
+		}
+		
 		return text
-			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i, '')
-			.replace(/<\!DOCTYPE\s+[\w\:]+\s+[^\[]*?\[((?:.|[\r\n])+?)\]\s*>/i, '')
-			.replace(/<\!DOCTYPE[^>]+?>/i, '')
+//			.replace(/<\!DOCTYPE\s+xsl:stylesheet\s+SYSTEM\s+['"](.+?)['"]\s*>/i, '')
+//			.replace(/<\!DOCTYPE\s+[\w\:]+\s+[^\[]*?\[((?:.|[\r\n])+?)\]\s*>/i, '')
+//			.replace(/<\!DOCTYPE[^>]+?>/i, '')
 	}
 	
 	/**
