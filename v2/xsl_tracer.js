@@ -34,7 +34,10 @@
 	 * @return {String}
 	 */
 	var resolvePath = function(filename, type) {
-		return utils.resolvePath(templates_root, filename);
+		// no need in path resolving if template root is empty
+		return templates_root 
+			? utils.resolvePath(templates_root, filename) 
+			: filename;
 	}
 	
 	/**
@@ -340,8 +343,10 @@
 			
 			if (options.template_path)
 				templates_root = options.template_path;
-			else
+			else if (options.template_url)
 				templates_root = utils.getBasePath(options.template_url);
+			else
+				templates_root = "";
 				
 			this.dispatchEvent(EVT_INIT);
 			
