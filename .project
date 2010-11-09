@@ -16,7 +16,7 @@
 			<arguments>
 				<dictionary>
 					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/XSL Tracer minifyer.launch</value>
+					<value>&lt;project&gt;/.externalToolBuilders/XSL Tracer.launch</value>
 				</dictionary>
 			</arguments>
 		</buildCommand>
