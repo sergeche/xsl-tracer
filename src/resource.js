@@ -84,6 +84,82 @@
 		return null;
 	}
 	
+	/**
+	 * Check if passed url has the same domain as the current one
+	 * @param {String} url
+	 * @return {Boolean}
+	 */
+	function isSameDomain(url) {
+		url = utils.trim(url);
+		var m = url.match(/^http:\/\/(.+?)(?:\/|$)/i);
+		if (m) {
+			var url_host = m[1];
+			if (url_host.indexOf('@') != -1) {
+				// remove username/password
+				url_host = url_host.split('@')[1];
+			}
+			
+			return url_host.toLowerCase() == location.host.toLowerCase();
+		}
+		
+		return true; // looks like relative path
+	}
+	
+	function loadAjax(url, slot, dict_name, callback) {
+		// force data type to 'text', content parsing should occur 
+		// when all documents are loaded
+		$.ajax({
+			dataType : 'text', 
+			error : function(/* XmlHttpRequest*/ xhr, text_status, error_thrown) {
+				xsl_tracer.dispatchEvent(EVT_LOAD_FILE_ERROR, {
+					url: url,
+					error_code: error_thrown,
+					error_data: text_status
+				});
+				
+				loadCallback();
+			},
+
+			success : function(data) {
+				addResource(dict_name, data, url, slot);
+				xsl_tracer.dispatchEvent(EVT_LOAD_FILE_COMPLETE, {url: url});
+				if (callback)
+					callback(data, url);
+					
+				loadCallback();
+			},
+			type : 'get',
+			url : url
+		});
+	}
+	
+	/**
+	 * Load data using YQL (for cross-domain ajax)
+	 */
+	function loadYQL(url, slot, dict_name, callback) {
+		$.getJSON("http://query.yahooapis.com/v1/public/yql?"
+				+ "q=select%20*%20from%20xml%20where%20url%3D%22"
+				+ encodeURIComponent(url)
+				+ "%22&format=xml&callback=?",
+				
+			function(data) {
+				if (data.results[0]) {
+					addResource(dict_name, data.results[0], url, slot);
+					xsl_tracer.dispatchEvent(EVT_LOAD_FILE_COMPLETE, {url: url});
+					if (callback)
+						callback(data.results[0], url);
+						
+					loadCallback();
+				} else {
+					xsl_tracer.dispatchEvent(EVT_LOAD_FILE_ERROR, {
+						url: url,
+						error_code: -1,
+						error_data: "Can't load data using YQL"
+					});
+				}
+			});
+	}
+	
 	return {
 		/**
 		 * Load external resource and store it as a part of <code>dict_name</code>
@@ -110,31 +186,10 @@
 				++files_loading;
 				xsl_tracer.dispatchEvent(EVT_LOAD_FILE_START, {url: url});
 				
-				// force data type to 'text', content parsing should occur 
-				// when all documents are loaded
-				$.ajax({
-					dataType : 'text', 
-					error : function(/* XmlHttpRequest*/ xhr, text_status, error_thrown) {
-						xsl_tracer.dispatchEvent(EVT_LOAD_FILE_ERROR, {
-							url: url,
-							error_code: error_thrown,
-							error_data: text_status
-						});
-						
-						loadCallback();
-					},
-		
-					success : function(data) {
-						addResource(dict_name, data, url, slot);
-						xsl_tracer.dispatchEvent(EVT_LOAD_FILE_COMPLETE, {url: url});
-						if (callback)
-							callback(data, url);
-							
-						loadCallback();
-					},
-					type : 'get',
-					url : url
-				});
+				if (isSameDomain(url))
+					loadAjax(url, slot, dict_name, callback);
+				else
+					loadYQL(url, slot, dict_name, callback);
 			}
 		},
 		
