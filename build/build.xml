@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="XSL Tracer" default="build_tracer">
+<project name="XSL Tracer" default="build_tracer" basedir="../">
 	<import file="webtasks.xml"/>
 	
 	<property name="output.dir" value="${basedir}/dist"/>
 	
 	<property name="js.dir" value="${output.dir}/js"/>
-	<property name="js-src.dir" value="${basedir}/v2"/>
+	<property name="js-src.dir" value="${basedir}/src"/>
 
 	<property name="css.dir" value="${output.dir}/css"/>
 	<property name="css-src.dir" value="${basedir}/css"/>
