@@ -1,0 +1,37 @@
+The goal of this project is to answer a simple question: _where does the particular element of XSL transformation came from?_ You can see it in action on the "demo page":http://media.chikuyonok.ru/xsl-tracer/. There's the result of XSL transformation—a simple HTML document. By clicking on any element you can get detailed information about it:
+
+* *XSL*: template which transformed this element.
+* *Context*: Context XML (which triggered the match, in the case of @xsl:apply-templates@). The content of the element is reduced (10 inner tags only) for performance.
+* *Source*: a place in your template where the element is actually generated. Very handy when doing @copy-of@ of result tree (in this example it's html code defined in variable).
+* *Call stack*: a stack of apply-template/call-template/apply-imports calls
+* *Inner calls*: a list of internal calls of templates that for whatever reason can not be displayed in the document. For example, templates that generate attributes for outer element or output text content. The list is displayed under the Call stack only if there are such calls.
+
+This demo works fine in Safari/Firefox/Chrome, Opera is terribly slow on large documents, IE is not tested at all.
+
+Wherever possible, the xpath of selected element is displayed so you can copy it with a single click. There are also the file name and line number so you can easily find a specific template in your editor.
+
+h2. How it works
+
+The project consists of two parts: the "backend":https://github.com/sergeche/xsl-tracer-backend and frontend.
+
+The backend uses Saxon 6.5 (because of some EXSLT issues in 9.2 branch). It has a built-in tracer, which by default generates the result as XML (grows up to several megabytes on real projects). I wrote a tracing class which displays the data in a more compact and lightweight JSON-format, as well as additional data like the list of used XSL and XML files (attached via @document()@ function). It also resolves result-tree fragments from @xsl:copy-of@ whenever possible.
+
+This tracer generates tracing data in JSON format, the output document and then combines them in a single HTML file which you can be opened directly in your browser.
+
+Then the frontend part binds trace data with the transformation result and handles all interface intercations.
+
+h2. How to run
+
+* Java runtime must be installed (version is not particularly important).
+* "Download the Saxon 6.5":http://sourceforge.net/projects/saxon/files/saxon6/6.5.5/
+* "Download the tracer":https://github.com/sergeche/xsl-tracer-backend/downloads
+* Generate a trace document with the following command in the console:
+@java -classpath /path/to/tracer.jar:/path/to/saxon.jar ru.imobilco.XSLTracer -to /path/to/trace-result.html /path/to/input.xml /path/to/template.xsl@
+
+The result of this command is a _trace-result.html_ file which can be opened directly in a browser (CSS and JS files are taken from external server). If an error occurs during the transformation, the file will be generated, but instead the document you will see an error message.
+
+You should remember that Saxon is very sensitive to all sorts of deviation from the specifications, so the transformation what worked in the Xalan/libxsl/somewhere else may not work in Saxon. In most cases, it's really easy to fix those issues in your XSL file.
+
+h2. Online version
+
+You can try XSL treacer online at "http://xmltools.ru":http://xmltools.ru. Just enter URL's of your XML and XSL files and hit the Transform buttom. The tracer will automatically download all dependent files required for transformation (they should be accessible online) and show you the output.
