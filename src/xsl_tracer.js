@@ -22,7 +22,13 @@
 		xpath_lookup = {},
 		
 		/** Wether or not errors occured during tracer initialization */
-		has_errors = false;
+		has_errors = false,
+		
+		/** 
+		 * Proxy URL for cross-domain ajax. Should contain %s placeholder 
+		 * for actual file path, e.g. 'http://mysite.com/proxy/?url=%s' 
+		 */
+		proxy = '';
 		
 	/**
 	 * Resolves path to file name, making it usable for downloading
@@ -335,6 +341,7 @@
 		 * @param {String} options.source_url Path to source XML which is transformed by XSL
 		 * @param {String|Object} options.trace_url Path or pointer to trace data
 		 * @param {String|Element} options.result_url Path or pointer to result data
+		 * @param {String} options.proxy Proxy url for cross-domain ajax
 		 */
 		init: function(options) {
 			// don't do anything if there's a global error
@@ -347,6 +354,9 @@
 				templates_root = utils.getBasePath(options.template_url);
 			else
 				templates_root = "";
+				
+			if (options.proxy)
+				this.setProxyUrl(options.proxy);
 				
 			this.dispatchEvent(EVT_INIT);
 			
@@ -424,6 +434,23 @@
 		 */
 		setPathResolver: function(fn) {
 			resolvePath = fn;
+		},
+		
+		/**
+		 * Sets new proxy url for cross-domain ajax
+		 * @param {Stirng} value An url with %s placeholder for actual path,
+		 * e.g. 'http://mysite.com/proxy/?url=%s' 
+		 */
+		setProxyUrl: function(value) {
+			proxy = value;
+		},
+		
+		/**
+		 * Returns proxy url for cross-domain ajax
+		 * @return {String}
+		 */
+		getProxyUrl: function() {
+			return proxy;
 		}
 	}
 })();

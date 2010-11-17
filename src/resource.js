@@ -105,9 +105,24 @@
 		return true; // looks like relative path
 	}
 	
+	/**
+	 * Returns proxied url for cross-domain ajax resource loading
+	 * @param {String} url Url to proxy
+	 * @return {String|null|
+	 */
+	function getProxiedUrl(url) {
+		var proxy = xsl_tracer.getProxyUrl();
+		return proxy ? proxy.replace('%s', encodeURIComponent(url)) : null;
+	}
+	
 	function loadAjax(url, slot, dict_name, callback) {
 		// force data type to 'text', content parsing should occur 
 		// when all documents are loaded
+		
+		var load_url = url;
+		if (!isSameDomain(url))
+			load_url = getProxiedUrl(url);
+			
 		$.ajax({
 			dataType : 'text', 
 			error : function(/* XmlHttpRequest*/ xhr, text_status, error_thrown) {
@@ -129,7 +144,7 @@
 				loadCallback();
 			},
 			type : 'get',
-			url : url
+			url : load_url || url
 		});
 	}
 	
@@ -186,7 +201,7 @@
 				++files_loading;
 				xsl_tracer.dispatchEvent(EVT_LOAD_FILE_START, {url: url});
 				
-				if (isSameDomain(url))
+				if (isSameDomain(url) || xsl_tracer.getProxyUrl())
 					loadAjax(url, slot, dict_name, callback);
 				else
 					loadYQL(url, slot, dict_name, callback);
