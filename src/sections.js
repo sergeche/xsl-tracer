@@ -270,5 +270,5 @@
 			cur_tab.addClass('xt-active').siblings().removeClass('xt-active');
 			updateTabFileLink();
 		}
-	})
+	});
 });

@@ -3,9 +3,12 @@
  * @author Sergey Chikuyonok (serge.che@gmail.com)
  * @link http://chikuyonok.ru
  * 
+ * @type utils
+ * @memberOf __utils
+ * 
  * @include "xsl_tracer.js"
  */
-var utils = function(){
+var utils = (/** @constructor */ function(){
 	var clippy_url = 'http://media.chikuyonok.ru/xsl-tracer/clippy.swf';
 	
 	/**
@@ -43,6 +46,7 @@ var utils = function(){
 	return {
 		/**
 		 * Возвращает только имя файла из всего пути
+		 * @memberOf utils
 		 * 
 		 * @param {String} path Путь к файлу
 		 * @return {String}
@@ -154,7 +158,7 @@ var utils = function(){
 		 * @return {String}
 		 */
 		createXPath: function(node, context, translate){
-			translate = translate || function(n){return n.nodeName};
+			translate = translate || function(n){return n.nodeName;};
 			
 			var parts = [];
 			
@@ -412,4 +416,4 @@ var utils = function(){
 		}
 
 	};
-}();
+})();

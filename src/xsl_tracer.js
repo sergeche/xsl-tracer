@@ -2,13 +2,16 @@
  * @author Sergey Chikuyonok (serge.che@gmail.com)
  * @link http://chikuyonok.ru
  * 
+ * @type xsl_tracer
+ * @memberOf __xsl_tracer
+ * 
  * @include "./lib/EventDispatcher.js"
  * @include "./lib/json2.js"
  * @include "event-names.js"
  * @include "utils.js"
  * @include "resource.js"
  * @include "errors.js"
- */var xsl_tracer = (function(){
+ */var xsl_tracer = (/** @constructor */ function(){
 	/** 
 	 * Main event dispatcher. Most of tracer features and UI components are 
 	 * binded to events. See <code>event-names.js</code> for a list of available
@@ -44,7 +47,7 @@
 		return templates_root 
 			? utils.resolvePath(templates_root, filename) 
 			: filename;
-	}
+	};
 	
 	/**
 	 * Removes all entity references from document
@@ -337,6 +340,7 @@
 	return {
 		/**
 		 * Init XSL tracer
+		 * @memberOf xsl_tracer
 		 * @param {Stirng} options.template_path Path to root XSL templates folder
 		 * @param {String} options.source_url Path to source XML which is transformed by XSL
 		 * @param {String|Object} options.trace_url Path or pointer to trace data
@@ -452,5 +456,5 @@
 		getProxyUrl: function() {
 			return proxy;
 		}
-	}
+	};
 })();

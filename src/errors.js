@@ -10,4 +10,4 @@ XmlParsingError.prototype = {
 	toString: function() {
 		return 'XmlParsingError';
 	}
-}
+};

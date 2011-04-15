@@ -3,12 +3,14 @@
  * @author Sergey Chikuyonok (serge.che@gmail.com)
  * @link http://chikuyonok.ru
  * 
+ * @memberOf __preloader
+ * 
  * @include "xsl_tracer.js"
- */(function(){
-	/** @type {jQuery} */
-	var preloader,
-		/** @type {jQuery} */
-		file_list;
+ */var __preloader = (/** @constructor */ function(){
+	/** @type jQuery */
+	var preloader;
+	/** @type jQuery */
+	var file_list;
 		
 	function processError(text) {
 		return text.replace(/\n\r?/g, '<br />');

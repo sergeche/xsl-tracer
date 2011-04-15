@@ -3,8 +3,11 @@
  * @author Sergey Chikuyonok (serge.che@gmail.com)
  * @link http://chikuyonok.ru
  * 
+ * @memberOf __renderer
+ * @type renderer
+ * 
  * @include "xsl_tracer.js"
- */var renderer = (function(){
+ */var renderer = (/** @constructor */ function(){
 	
 	/** List of self-closing tags */
 	var close_self = makeMap("colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr");
@@ -60,7 +63,7 @@
 			add_class = '';
 			
 		if (is_one_liner || !node.childNodes.length)
-			add_class += ' xt-clr-one-line'
+			add_class += ' xt-clr-one-line';
 			
 		result.push('<span class="xt-clr-tag' + add_class + '">');
 		result.push('<span class="xt-clr-tag-switcher"></span>');
@@ -100,6 +103,7 @@
 	return {
 		/**
 		 * Render XML fragment as styled HTML tree
+		 * @memberOf renderer
 		 * @param {Element} elem
 		 * @param {Number} limit How many nodes to render
 		 */

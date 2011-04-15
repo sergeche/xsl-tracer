@@ -3,9 +3,12 @@
  * @author Sergey Chikuyonok (serge.che@gmail.com)
  * @link http://chikuyonok.ru
  * 
+ * @memberOf __resource
+ * @type resource
+ * 
  * @include "xsl_tracer.js"
  * @include "error-names.js"
- */var resource = (function(){
+ */var resource = (/** @constructor */ function(){
 	var resources = {},
 		/** How many files is currently loading or in load queue */
 		files_loading = 0,
@@ -179,6 +182,7 @@
 		/**
 		 * Load external resource and store it as a part of <code>dict_name</code>
 		 * dictionary
+		 * @memberOf resource
 		 * @param {String|Object} url Resource's URL. Passing other that 'string'
 		 * object type means resource already loaded and should be added to the
 		 * resource collection as is.
@@ -292,5 +296,5 @@
 					addResource(dict_type, data, res_name);
 			}
 		}
-	}
+	};
 })();

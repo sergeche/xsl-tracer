@@ -3,13 +3,15 @@
  * @author Sergey Chikuyonok (serge.che@gmail.com)
  * @link http://chikuyonok.ru
  * 
+ * @memberOf __ui
+ * 
  * @include "xsl_tracer.js"
  * @include "renderer.js"
- */(function(){
-	/** @type {jQuery} */
-	var file_contents,
-		/** @type {jQuery} Currently selected element */
-		selected_elem;
+ */var __ui = (/** @constructor */ function(){
+	/** @type jQuery */
+	var file_contents;
+	/** @type jQuery Currently selected element */
+	var selected_elem;
 	
 	/**
 	 * Highlight element
