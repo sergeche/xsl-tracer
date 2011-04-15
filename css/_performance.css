@@ -1,0 +1,35 @@
+.xt-performance-header {
+	border-top: 0;
+	border-bottom: 0;
+	padding-left: 15px;
+	line-height: 2;
+	height: auto;
+}
+	
+.xt-performance-table {
+	border-collapse: collapse;
+	font-size: 11px;
+	width: 100%;
+	border-bottom: 1px solid #aaa;
+}
+
+.xt-performance-table td,
+.xt-performance-table th {
+	padding: 0.2em 0.4em;
+	border-left: 1px solid #aaa;
+	border-right: 1px solid #aaa;
+	vertical-align: top;
+}
+
+.xt-performance-table th {
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAEBJREFUeNrM0rsNADAIQ0Gwwv778k1GgAIprz65MlcVtQNNOpk50O6+ps1sbVtVB/r1iRaRvuaIGGwD2HrVFWAAZZMYFdTXuCIAAAAASUVORK5CYII=) #fff 0 50% repeat-x;
+	border: 1px solid #aaa;
+}
+
+.xt-num-cell {
+	text-align: right;
+}
+
+.xt-performance-table tr:nth-of-type(2n+1) {
+	background: #e9f2ff;
+}

@@ -72,7 +72,6 @@ body {
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#d4d4d4), to(#bbb));
 	background-image: -moz-linear-gradient(top, #d4d4d4, #bbb);
 	background-color:#c3c3c3;
-	padding:0 15px;
 	line-height:2.5em;
 	height:2.5em;
 	color:#333333;
@@ -82,13 +81,41 @@ body {
 	-moz-box-sizing:border-box;
 	box-sizing:border-box;
 	cursor: row-resize;
+	overflow: hidden;
 }
+
+.xt-panel-pane-switcher {
+	display: block;
+	padding:0 15px;
+	border-left: 1px solid #dadada;
+	border-right: 1px solid #9d9d9d;
+	float: left;
+	cursor: pointer;
+}
+
+.xt-panel-pane-switcher-selected {
+	background: rgba(255,255,255, 0.5);
+}
+
+.xt-panel-pane {
+	position: absolute;
+	top: 2.5em;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	overflow: auto;
+	display: none;
+}
+
+.xt-panel-pane-selected {
+	display: block;
+} 
 
 .xt-section {
 	border-left:1px solid #a3a3a3;
 	width:33%;
 	position:absolute;
-	top:2.5em;
+	top:0;
 	bottom:0;
 	/* overflow:auto; */
 	background:#fff;

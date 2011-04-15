@@ -251,6 +251,65 @@
 		}
 	}
 	
+	function formatTime(millis) {
+		if (millis > 1000) {
+			return (millis / 1000).toFixed(3) + ' s';
+		}
+		
+		return Math.round(millis) + ' ms';
+	}
+	
+	/**
+	 * Creates table with performance data
+	 * @returns jQuery
+	 */
+	function createPerformanceTable() {
+		var perf_data = performance.getData();
+		var doc = resource.getResource('trace');
+		var buf = [], file_info = [];
+		buf.push('<h3 class="xt-performance-header xt-subtitle-plate">Total time: ' + formatTime(doc[0].data.time) + '</h3>');
+		
+		// create table header
+		buf.push('<tr>' +
+			'<th>Element</th>' +
+			'<th>Min Time</th>' +
+			'<th>Max Time</th>' +
+			'<th>Average Time</th>' +
+			'<th>Total Time</th>' +
+			'<th>Total Calls</th>' +
+			'<th>File</th>' +
+		'</tr>');
+		
+		// create data
+		utils.each(perf_data, function(i, n) {
+			var src = n.trace.src;
+			var file_title = resource.getResourceName(src) + ':' + src.l;
+			
+			file_info.push({
+				type: src.v,
+				name: src.i,
+				hl: resource.getResourceElement(src)
+			});
+			
+			buf.push('<tr>' +
+				'<td>' + createTagFromTrace(n.trace) + '</td>' +
+				'<td class="xt-num-cell" data-sort="' + n.min + '">' + formatTime(n.min) + '</td>' +
+				'<td class="xt-num-cell" data-sort="' + n.max + '">' + formatTime(n.max) + '</td>' +
+				'<td class="xt-num-cell" data-sort="' + n.avg + '">' + formatTime(n.avg) + '</td>' +
+				'<td class="xt-num-cell" data-sort="' + n.total + '">' + formatTime(n.total) + '</td>' +
+				'<td class="xt-num-cell" data-sort="' + n.calls + '">' + n.calls + '</td>' +
+				'<td><span class="xt-file-link" title="' + file_title + '">' + file_title + '</span></td>' +
+			'</tr>');
+		});
+		
+		var table = $('<table class="xt-performance-table">' + buf.join('') + '</table>');
+		table.find('.xt-file-link').each(function(i, n) {
+			$(n).data('file-info', file_info[i]);
+		});
+		
+		return table;
+	}
+	
 	xsl_tracer.addEvent(EVT_TRACE, function(evt) {
 		var trace_obj = evt.data;
 		if (trace_obj) {
@@ -262,6 +321,10 @@
 			
 			updateTabFileLink();
 		}
+	});
+	
+	xsl_tracer.addEvent(EVT_COMPLETE, function() {
+		$('#xt-performance-pane').empty().append(createPerformanceTable());
 	});
 	
 	section_xml.find('.xt-section-tabs > dt').click(function() {

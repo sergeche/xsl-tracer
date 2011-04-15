@@ -56,6 +56,21 @@
 		}
 	});
 	
+	$(document).delegate('.xt-panel-pane-switcher', 'click', function(/* Event */ evt) {
+		evt.preventDefault();
+		var el=$(this);
+		if (!el.hasClass('xt-panel-pane-switcher-selected')) {
+			var pane_id = el.attr('data-pane-id');
+			
+			$('#' + el.attr('data-pane-id')).addClass('xt-panel-pane-selected')
+				.siblings('.xt-panel-pane').removeClass('xt-panel-pane-selected');
+			
+			el.addClass('xt-panel-pane-switcher-selected')
+				.siblings('.xt-panel-pane-switcher')
+				.removeClass('xt-panel-pane-switcher-selected');
+		}
+	});
+	
 	xsl_tracer.addEvent(EVT_INIT, function(args) {
 		file_contents = $('#xt-content');
 		$(document.body).addClass('loading');
