@@ -275,6 +275,7 @@
 			'<th>Min Time</th>' +
 			'<th>Max Time</th>' +
 			'<th>Average Time</th>' +
+			'<th>Own Time</th>' +
 			'<th>Total Time</th>' +
 			'<th>Total Calls</th>' +
 			'<th>File</th>' +
@@ -296,6 +297,7 @@
 				'<td class="xt-num-cell" data-sort="' + n.min + '">' + formatTime(n.min) + '</td>' +
 				'<td class="xt-num-cell" data-sort="' + n.max + '">' + formatTime(n.max) + '</td>' +
 				'<td class="xt-num-cell" data-sort="' + n.avg + '">' + formatTime(n.avg) + '</td>' +
+				'<td class="xt-num-cell" data-sort="' + n.own + '">' + formatTime(n.own) + '</td>' +
 				'<td class="xt-num-cell" data-sort="' + n.total + '">' + formatTime(n.total) + '</td>' +
 				'<td class="xt-num-cell" data-sort="' + n.calls + '">' + n.calls + '</td>' +
 				'<td><span class="xt-file-link" title="' + file_title + '">' + file_title + '</span></td>' +

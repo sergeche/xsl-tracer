@@ -22,34 +22,38 @@ var performance = (/** @constructor */ function () {
 	};
 	
 	/**
-	 * Recursive function that collects performance data from trace document.
+	 * Recursive function that collects performance data from trace document. 
+	 * The result is stored in <code>data</code> object
 	 * @param {Object} doc Trace document
-	 * @param {Object} data Internal data storage object
+	 * @param {Object} data Object reference where data will be stored
 	 * @returns {Object} Collected data, key is element's xpath
 	 */
 	function collectData(doc, data) {
-		data = data || {};
+		var total_time = 0;
 		
 		if (doc.children) {
 			utils.each(doc.children, function(i, n) {
+				var inner_time = collectData(n, data);
 				if (n.type === 'XSL' && n.name in allowed_tags) {
 					var key = n.src.xpath;
 					if (!(key in data)) {
 						data[key] = {
 							name: n.name,
 							trace: n,
+							inner_time: [],
 							time: []
 						};
 					}
 					
 					data[key].time.push(n.time);
+					data[key].inner_time.push(inner_time);
 				}
 				
-				collectData(n, data);
+				total_time += n.time || 0;
 			});
 		}
 		
-		return data;
+		return total_time;
 	}
 	
 	/**
@@ -68,11 +72,15 @@ var performance = (/** @constructor */ function () {
 			if (!len) continue;
 			
 			// find min, max and total time
-			var min = n.time[0], max = n.time[0], total = 0;
+			var min = n.time[0], max = n.time[0], total = 0, inner = 0;
 			utils.each(n.time, function(i, j) {
 				if (j < min) min = j;
 				if (j > max) max = j;
 				total += j;
+			});
+			
+			utils.each(n.inner_time, function(i, j) {
+				inner += j;
 			});
 			
 			result.push({
@@ -83,7 +91,8 @@ var performance = (/** @constructor */ function () {
 				min: min,
 				max: max,
 				avg: len ? total / len : 0,
-				total: total
+				total: total,
+				own: total - inner
 			});
 		}
 		
@@ -101,9 +110,12 @@ var performance = (/** @constructor */ function () {
 		getData: function() {
 			if (!data) {
 				var doc = resource.getResource('trace');
-				data = createTable( collectData(doc[0].data) );
+				var tmpl = {};
+				collectData(doc[0].data, tmpl);
+				
+				data = createTable(tmpl);
 				data = data.sort(function(a, b) {
-					return b.total - a.total;
+					return b.own - a.own;
 				});
 			}
 			
