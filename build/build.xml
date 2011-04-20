@@ -39,6 +39,7 @@
 				<file name="preloader.js"/>
 				<file name="bottom-panel.js"/>
 				<file name="performance.js"/>
+				<file name="table-sort.js"/>
 				<file name="__outro.js" />
 			</filelist>
 		</compile-js-lib>
