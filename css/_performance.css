@@ -24,10 +24,12 @@
 .xt-performance-table th {
 	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAEBJREFUeNrM0rsNADAIQ0Gwwv778k1GgAIprz65MlcVtQNNOpk50O6+ps1sbVtVB/r1iRaRvuaIGGwD2HrVFWAAZZMYFdTXuCIAAAAASUVORK5CYII=) #fff 0 50% repeat-x;
 	border: 1px solid #aaa;
+	white-space: nowrap;
 }
 
 .xt-num-cell {
 	text-align: right;
+	white-space: nowrap;
 }
 
 .xt-performance-table tr:nth-of-type(2n+1) {
